@@ -22,6 +22,9 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Social_User> socialUser = new ArrayList<>();
 
+    @OneToMany(mappedBy = "comment_user")
+    private List<Comment> comments = new ArrayList<>();
+
     private String username;
 
     private String password;
