@@ -5,9 +5,12 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "Posts")
 public class Post {
     @Id
     private int id;
@@ -26,8 +29,10 @@ public class Post {
 
     private String postType;
 
-    private int commentCnt;
+    @OneToMany(mappedBy = "post")
+    private List<Comment> comments = new ArrayList<>();
 
-    private int likeCnt;
+    @OneToMany(mappedBy = "post")
+    private List<Love> loves = new ArrayList<>();
 
 }

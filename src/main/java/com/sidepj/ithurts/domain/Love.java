@@ -7,17 +7,21 @@ import javax.persistence.*;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "my_like")
-public class Like {
+@Table(name = "loves")
+public class Love {
     @Id
-    @Column(name = "like_id")
+    @Column(name = "love_id")
     private int id;
 
     @ManyToOne
     @JoinColumn(name="member_id")
-    private Member like_member;
+    private Member love_member;
 
-    private int postId;
+    @ManyToOne
+    @JoinColumn(name = "post_id")
+    private Post post;
 
-    private int commentId;
+    @ManyToOne
+    @JoinColumn(name = "comment_id")
+    private Comment comment;
 }

@@ -8,9 +8,11 @@ import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name="reports")
 public class Report {
 
     @Id
+    @Column(name = "report_id")
     private int id;
 
 

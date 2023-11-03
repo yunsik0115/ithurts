@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "social_members")
 public class SocialMember {
 
     @Id
