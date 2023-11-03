@@ -43,7 +43,7 @@ public class Pharmacy {
     @Column(name = "pharmacy_created_date")
     private LocalDateTime createdDate;
 
-    private boolean is_available;
+    // private boolean is_available; 서비스 단에서 처리
 
     @OneToMany(mappedBy = "pharmacy")
     private List<Report> reports = new ArrayList<>();

@@ -25,7 +25,7 @@ public class Hospital {
     private String contact;
 
     @Column(name="hospital_address")
-    private String Address; //Embedded Class Address will be made - TO DO -
+    private String Address;
 
     @Column(name="hospital_type")
     private String hospitalType;
@@ -45,7 +45,7 @@ public class Hospital {
     private LocalDateTime createdOn;
 
 
-    private boolean is_available;
+    // private boolean is_available; 서비스단에서 처리
 
     @OneToMany(mappedBy = "hospital")
     private List<Report> reports = new ArrayList<>();
