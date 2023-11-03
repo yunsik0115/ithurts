@@ -8,6 +8,8 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Entity
@@ -33,5 +35,9 @@ public class Pharmacy {
     private LocalDateTime createdOn;
 
     private boolean is_available;
+
+    @OneToMany(mappedBy = "pharmacy")
+    private List<Report> reports = new ArrayList<>();
+
 
 }

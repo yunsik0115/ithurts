@@ -19,7 +19,9 @@ public class Report {
     private User report_user;// FK for user who created this report.
 
 
-    private int pharmId; // FK for which pharmacy's data is wrong.
+    @ManyToOne
+    @JoinColumn(name = "pharmacy_id")
+    private Pharmacy pharmacy;
 
     private int hospId; // FK for which hospital's data is wrong.
 
