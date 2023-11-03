@@ -16,6 +16,9 @@ public class User {
     @Column(name = "user_id")
     private int id;
 
+    @OneToMany(mappedBy = "report_user")
+    private List<Report> reports = new ArrayList<>();
+
     @OneToMany(mappedBy = "user")
     private List<Social_User> socialUser = new ArrayList<>();
 
