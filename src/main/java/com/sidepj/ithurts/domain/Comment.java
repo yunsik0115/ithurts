@@ -12,6 +12,7 @@ import java.util.List;
 @Table(name = "comments")
 public class Comment {
     @Id
+    @Column(name = "comment_id")
     private int id;
 
     @ManyToOne
@@ -22,6 +23,7 @@ public class Comment {
     @JoinColumn(name = "member_id")
     private Member comment_member;
 
+    @JoinColumn(name = "comment_content")
     private String content;
 
     @OneToMany(mappedBy = "comment")

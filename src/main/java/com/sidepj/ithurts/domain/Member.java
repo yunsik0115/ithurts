@@ -32,15 +32,20 @@ public class Member {
     @OneToMany(mappedBy = "love_member")
     private List<Love> loves = new ArrayList<>();
 
-    private String username;
-
+    @Column(name = "member_name")
+    private String name;
+    @Column(name = "member_password")
     private String password;
 
-    private LocalDateTime createdAt;
+    @Column(name = "member_created_date")
+    private LocalDateTime createdDate;
 
+    @Column(name = "member_lastpassword_changed_date")
     private LocalDateTime lastPwdChanged;
 
+    @Column(name = "member_role")
     private String role;
+
 
     boolean isPwdExpired;
 

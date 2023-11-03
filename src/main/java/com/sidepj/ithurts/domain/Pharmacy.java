@@ -19,20 +19,29 @@ public class Pharmacy {
     @Column(name = "pharmacy_id")
     private int id;
 
+    @Column(name = "pharmacy_name")
     private String name;
 
+    @Column(name = "pharmacy_contact")
     private String contact;
 
+    @Column(name="pharmacy_address")
     private String Address; //Embedded Class Address will be made - TO DO -
 
+    @Column(name = "pharmacy_officeday")
     private String officeDay;
 
+    @Column(name= "pharmacy_officetime")
     private String officeTime;
 
+    @Column(name = "pharmacy_coordinates")
     private Point coordinates;
 
-    private LocalDateTime updatedOn;
-    private LocalDateTime createdOn;
+    @Column(name = "pharmacy_updated_date")
+    private LocalDateTime updatedDate;
+
+    @Column(name = "pharmacy_created_date")
+    private LocalDateTime createdDate;
 
     private boolean is_available;
 
