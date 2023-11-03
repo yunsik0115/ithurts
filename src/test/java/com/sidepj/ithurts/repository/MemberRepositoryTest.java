@@ -11,6 +11,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,6 +36,18 @@ class MemberRepositoryTest {
         Optional<Member> findMember = memberRepository.findById(memberId);
         Member findedMember = findMember.get();
         Assertions.assertThat(findedMember.getId()).isEqualTo(memberId);
+    }
+
+    @Test
+    @Transactional
+    void findMember() {
+        Member member = new Member("yunsik", "1234");
+        Long memberId = memberRepository.save(member).getId();
+        Optional<Member> memberById = memberRepository.findById(memberId);
+        Member member1 = memberById.get();
+        Member member2 = memberRepository.findMemberByName("yunsik");
+
+        Assertions.assertThat(member1).isEqualTo(member2);
     }
 
 }
