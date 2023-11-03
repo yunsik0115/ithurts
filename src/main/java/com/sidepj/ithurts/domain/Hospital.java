@@ -16,7 +16,7 @@ public class Hospital {
 
     @Id
     @Column(name="hospital_id")
-    private int id;
+    private Long id;
 
     @Column(name="hospital_name")
     private String name;
@@ -25,7 +25,7 @@ public class Hospital {
     private String contact;
 
     @Column(name="hospital_address")
-    private String Address;
+    private String Address; // To-Do Region으로 나누기
 
     @Column(name="hospital_type")
     private String hospitalType;

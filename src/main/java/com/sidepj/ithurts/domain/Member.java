@@ -1,6 +1,7 @@
 package com.sidepj.ithurts.domain;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
@@ -11,11 +12,13 @@ import java.util.List;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "members")
+@Getter
 public class Member {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "member_id")
-    private int id;
+    private Long id;
 
     @OneToMany(mappedBy = "report_member")
     private List<Report> reps = new ArrayList<>();
@@ -26,7 +29,7 @@ public class Member {
     @OneToMany(mappedBy = "comment_member")
     private List<Comment> comments = new ArrayList<>();
 
-    @OneToMany(mappedBy = "post_member")
+    @OneToMany(mappedBy = "postMember")
     private List<Post> posts = new ArrayList<>();
 
     @OneToMany(mappedBy = "love_member")
@@ -53,5 +56,8 @@ public class Member {
 
     boolean isLocked;
 
-
+    public Member(String name, String password) {
+        this.name = name;
+        this.password = password;
+    }
 }

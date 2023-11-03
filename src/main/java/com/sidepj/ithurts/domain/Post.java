@@ -15,14 +15,14 @@ public class Post {
 
     @Id
     @Column(name = "post_id")
-    private int id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "member_id")
-    private Member post_member; // fk for indicate which user created this post.
+    private Member postMember; // fk for indicate which user created this post.
 
     @Column(name = "post_name")
-    private String name;
+    private String postName;
 
     @Column(name = "post_content")
     private String content;
