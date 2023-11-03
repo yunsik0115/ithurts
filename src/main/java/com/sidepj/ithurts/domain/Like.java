@@ -3,16 +3,19 @@ package com.sidepj.ithurts.domain;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "my_like")
 public class Like {
     @Id
+    @Column(name = "like_id")
     private int id;
 
-    private int userId;
+    @ManyToOne
+    @JoinColumn(name="member_id")
+    private Member like_member;
 
     private int postId;
 

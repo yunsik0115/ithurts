@@ -15,8 +15,8 @@ public class Report {
 
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User report_user;// FK for user who created this report.
+    @JoinColumn(name = "member_id")
+    private Member report_member;// FK for user who created this report.
 
 
     @ManyToOne

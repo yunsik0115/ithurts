@@ -10,20 +10,26 @@ import java.util.List;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class User {
+public class Member {
 
     @Id
-    @Column(name = "user_id")
+    @Column(name = "member_id")
     private int id;
 
-    @OneToMany(mappedBy = "report_user")
+    @OneToMany(mappedBy = "report_member")
     private List<Report> reports = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user")
-    private List<Social_User> socialUser = new ArrayList<>();
+    @OneToMany(mappedBy = "member")
+    private List<SocialMember> socialUser = new ArrayList<>();
 
-    @OneToMany(mappedBy = "comment_user")
+    @OneToMany(mappedBy = "comment_member")
     private List<Comment> comments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post_member")
+    private List<Post> posts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "like_member")
+    private List<Like> likes = new ArrayList<>();
 
     private String username;
 

@@ -3,8 +3,7 @@ package com.sidepj.ithurts.domain;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -13,7 +12,9 @@ public class Post {
     @Id
     private int id;
 
-    private int userId; // fk for indicate which user created this post.
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member post_member; // fk for indicate which user created this post.
 
     private String postname;
 
