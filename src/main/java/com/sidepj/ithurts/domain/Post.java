@@ -12,21 +12,28 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "Posts")
 public class Post {
+
     @Id
+    @Column(name = "post_id")
     private int id;
 
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member post_member; // fk for indicate which user created this post.
 
-    private String postname;
+    @Column(name = "post_name")
+    private String name;
 
+    @Column(name = "post_content")
     private String content;
 
-    private LocalDateTime createdAt;
+    @Column(name = "post_created_date")
+    private LocalDateTime createdDate;
 
-    private LocalDateTime modifiedAt;
+    @Column(name = "post_modified_date")
+    private LocalDateTime modifiedDate;
 
+    @Column(name = "post_type")
     private String postType;
 
     @OneToMany(mappedBy = "post")
