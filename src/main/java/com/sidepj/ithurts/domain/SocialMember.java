@@ -12,16 +12,20 @@ import java.time.LocalDateTime;
 public class SocialMember {
 
     @Id
+    @Column(name = "social_id")
     private int id;
 
     @ManyToOne
-    @JoinTable(name = "member_id")
+    @JoinTable(name = "member_id") // Note that FK Column name cannot be declared arbitrarily.
     private Member member;
 
+    @Column(name = "social_type")
     private String socialType; // Referenced From Naver API Specification
 
+    @Column(name = "social_profile")
     private String socialProfile;
 
+    @Column(name = "social_connected_date")
     private LocalDateTime connectedDate;
 
 }
