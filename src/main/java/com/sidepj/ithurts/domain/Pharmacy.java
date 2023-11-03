@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.locationtech.jts.geom.Point;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
@@ -17,6 +18,7 @@ import java.util.List;
 public class Pharmacy {
 
     @Id
+    @Column(name = "pharmacy_id")
     private int id;
 
     private String name;

@@ -23,7 +23,9 @@ public class Report {
     @JoinColumn(name = "pharmacy_id")
     private Pharmacy pharmacy;
 
-    private int hospId; // FK for which hospital's data is wrong.
+    @ManyToOne
+    @JoinColumn(name = "hospital_id")
+    private Hospital hospital; // FK for which hospital's data is wrong.
 
     private LocalDateTime createdAt;
 

@@ -4,15 +4,20 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.locationtech.jts.geom.Point;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Hospital {
 
     @Id
+    @Column(name="hospital_id")
     private int id;
 
     private String name;
@@ -33,4 +38,7 @@ public class Hospital {
     private LocalDateTime createdOn;
 
     private boolean is_available;
+
+    @OneToMany(mappedBy = "hospital")
+    private List<Report> reports = new ArrayList<>();
 }
