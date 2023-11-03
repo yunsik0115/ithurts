@@ -29,8 +29,10 @@ public class Report {
     @JoinColumn(name = "hospital_id")
     private Hospital hospital; // FK for which hospital's data is wrong.
 
-    private LocalDateTime createdAt;
+    @Column(name = "report_created_date")
+    private LocalDateTime createdDate;
 
+    @Column(name = "report_comment")
     private String comment; // reason which will be entered by users.
 
 
