@@ -3,8 +3,7 @@ package com.sidepj.ithurts.domain;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -14,7 +13,9 @@ public class Report {
     @Id
     private int id;
 
-    private int userId; // FK for user who created this report.
+
+    private int userId;// FK for user who created this report.
+
 
     private int pharmId; // FK for which pharmacy's data is wrong.
 

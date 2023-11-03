@@ -3,8 +3,7 @@ package com.sidepj.ithurts.domain;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -14,7 +13,9 @@ public class Social_User {
     @Id
     private int id;
 
-    private int userId; // fk from user
+    @ManyToOne
+    @JoinTable(name = "user_id")
+    private User user;
 
     private String socialType; // Referenced From Naver API Specification
 

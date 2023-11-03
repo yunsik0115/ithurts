@@ -6,7 +6,9 @@ import org.locationtech.jts.geom.Point;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import java.time.LocalDateTime;
+
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -31,4 +33,5 @@ public class Pharmacy {
     private LocalDateTime createdOn;
 
     private boolean is_available;
+
 }
