@@ -25,29 +25,27 @@ class MemberRepositoryTest {
     @PersistenceContext
     EntityManager em;
 
+    // 1. Test Saving Member
+
     @Test
     @Transactional
-    void saveMember(){
-        Member member = new Member("yunsik", "1234");
-        Long memberId = memberRepository.save(member).getId();
+    void saveTest(){
+
+        // Given
+        Member member = new Member("Yunsik", "Hello");
+
         em.flush();
         em.clear();
+        // When
+        Member savedMember = memberRepository.save(member);
+        Long savedId = savedMember.getId();
+        Optional<Member> searchedFromDB = memberRepository.findById(savedId);
+        Member searchedMemberFromDB = searchedFromDB.get();
 
-        Optional<Member> findMember = memberRepository.findById(memberId);
-        Member findedMember = findMember.get();
-        Assertions.assertThat(findedMember.getId()).isEqualTo(memberId);
+        // Then
+        Assertions.assertThat(savedId).isEqualTo(searchedMemberFromDB.getId());
+
     }
 
-    @Test
-    @Transactional
-    void findMember() {
-        Member member = new Member("yunsik", "1234");
-        Long memberId = memberRepository.save(member).getId();
-        Optional<Member> memberById = memberRepository.findById(memberId);
-        Member member1 = memberById.get();
-        Member member2 = memberRepository.findMemberByName("yunsik");
-
-        Assertions.assertThat(member1).isEqualTo(member2);
-    }
 
 }

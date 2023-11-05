@@ -1,7 +1,9 @@
 package com.sidepj.ithurts.domain;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -11,9 +13,11 @@ import java.util.List;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "Posts")
+@Getter @Setter
 public class Post {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "post_id")
     private Long id;
 
@@ -42,4 +46,11 @@ public class Post {
     @OneToMany(mappedBy = "post")
     private List<Love> loves = new ArrayList<>();
 
+
+    // Constructor for testing (Temporary)
+    public Post(String postName, String content, Member postMember) {
+        this.postMember = postMember;
+        this.postName = postName;
+        this.content = content;
+    }
 }
