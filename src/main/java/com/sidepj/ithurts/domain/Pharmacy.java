@@ -1,7 +1,6 @@
 package com.sidepj.ithurts.domain;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.locationtech.jts.geom.Point;
 
 import javax.persistence.*;
@@ -11,7 +10,9 @@ import java.util.List;
 
 
 @Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
+@Getter
+@Setter
 @Table(name = "pharmacy")
 public class Pharmacy {
 
@@ -42,6 +43,15 @@ public class Pharmacy {
 
     @Column(name = "pharmacy_created_date")
     private LocalDateTime createdDate;
+
+    public Pharmacy(String name, String contact, String address, String officeDay, String officeTime, Point coordinates) {
+        this.name = name;
+        this.contact = contact;
+        Address = address;
+        this.officeDay = officeDay;
+        this.officeTime = officeTime;
+        this.coordinates = coordinates;
+    }
 
     // private boolean is_available; 서비스 단에서 처리
 
