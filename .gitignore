@@ -69,7 +69,8 @@ atlassian-ide-plugin.xml
 .idea/sonarlint/
 
 #API-KEY Ignoring git
-resources/API-KEY.properties
+src/main/resources/API-KEY.yml
+
 
 # Crashlytics plugin (for Android Studio and IntelliJ)
 com_crashlytics_export_strings.xml
