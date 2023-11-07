@@ -2,6 +2,7 @@ package com.sidepj.ithurts.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.sidepj.ithurts.domain.Pharmacy;
 import com.sidepj.ithurts.repository.HospitalRepository;
 import com.sidepj.ithurts.repository.PharmacyRepository;
 import com.sidepj.ithurts.service.dto.PharmacyDTO;
@@ -18,8 +19,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -31,7 +38,7 @@ public class OpenAPIPharmacyDataService {
     private final PharmacyRepository pharmacyRepository;
     private final ObjectMapper objectMapper;
 
-    @Value("${OPENAPI-CLIENT}") // Lombok의 Value가 아님
+    @Value("${OPENAPI-Pharmacy-SecretKey}") // Lombok의 Value가 아님
     private String serviceKeyValue;
 
     public boolean retrieveDataByCityName(String cityName) throws IOException {
@@ -76,12 +83,55 @@ public class OpenAPIPharmacyDataService {
             JSONObject pharmacy = pharmacies.getJSONObject(i);
             String pharmacyJSONString = pharmacy.toString();
             PharmacyDTO pharmacyDTO = jsonMapper.readValue(pharmacyJSONString, PharmacyDTO.class);
+            pharmacyDTOList.add(pharmacyDTO);
             log.trace("{}", pharmacyDTO);
         }
+
 
         return true;
     }
 
+    public List<Pharmacy> dtoToPharmacy(List<PharmacyDTO> pharmacyDTOS){
+        Pharmacy pharmacy = new Pharmacy();
 
+        for (PharmacyDTO pharmacyDTO : pharmacyDTOS) {
+            pharmacy.setName(pharmacyDTO.getDutyName());
+            pharmacy.setContact(pharmacyDTO.getDutyTel1());
+            pharmacy.setAddress(pharmacyDTO.getDutyAddr());
+        }
+        //pharmacy.setOfficeDay();
+
+        return new ArrayList<>();
+    }
+
+    public Map<String, LocalTime> officeDayExtractionFromDTOs(PharmacyDTO pharmacyDTO){
+
+        Map<String, LocalTime> officeDay = new HashMap<>();
+
+        //c - 오전  s- 오후
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmm");
+        LocalTime mondayOPEN = LocalTime.parse(pharmacyDTO.getDutyTime1c(), formatter);
+        officeDay.put("monOPEN", mondayOPEN);
+        LocalTime mondayCLOSED = LocalTime.parse(pharmacyDTO.getDutyTime1s(), formatter);
+        officeDay.put("mondCLOSED", mondayCLOSED);
+        LocalTime tuesdayOPEN = LocalTime.parse(pharmacyDTO.getDutyTime1c(), formatter);
+        officeDay.put("tueOPEN", tuesdayOPEN);
+        LocalTime tuesdayCLOSED = LocalTime.parse(pharmacyDTO.getDutyTime1c(), formatter);
+        officeDay.put("tueCLOSED", tuesdayCLOSED);
+        LocalTime wednesdayOPEN = LocalTime.parse(pharmacyDTO.getDutyTime1c(), formatter);
+        officeDay.put("wedOPEN", wednesdayOPEN);
+        LocalTime wednesdayCLOSED = LocalTime.parse(pharmacyDTO.getDutyTime1c(), formatter);
+        officeDay.put("wedCLOSED", wednesdayCLOSED);
+        LocalTime thursdayOPEN = LocalTime.parse(pharmacyDTO.getDutyTime1c(), formatter);
+        officeDay.put("thuOPEN", thursdayOPEN);
+        LocalTime thursdayCLOSED = LocalTime.parse(pharmacyDTO.getDutyTime1c(), formatter);
+        officeDay.put("thuCLOSED", thursdayCLOSED);
+        LocalTime fridayOPEN = LocalTime.parse(pharmacyDTO.getDutyTime1c(), formatter);
+        officeDay.put("friOPEN", fridayOPEN);
+        LocalTime fridayCLOSED = LocalTime.parse(pharmacyDTO.getDutyTime1c(), formatter);
+        officeDay.put("friCLOSED", fridayCLOSED);
+
+        return officeDay;
+    }
 
 }

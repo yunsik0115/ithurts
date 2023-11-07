@@ -2,7 +2,10 @@ package com.sidepj.ithurts.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sidepj.ithurts.domain.Pharmacy;
 import lombok.*;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.CoordinateXY;
 import org.locationtech.jts.geom.Point;
 
 @Builder
@@ -15,6 +18,7 @@ public class PharmacyDTO {
 
     private String dutyAddr; // 주소
     private String dutyName; // 약국 이름
+    private String dutyTel1; // 대표 전화 1
 
     // c: 오전 s: 오후 - OPENAPI Spec
     private String dutyTime1c;
