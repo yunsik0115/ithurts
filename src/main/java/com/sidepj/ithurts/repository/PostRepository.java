@@ -1,6 +1,5 @@
 package com.sidepj.ithurts.repository;
 
-import com.sidepj.ithurts.domain.Member;
 import com.sidepj.ithurts.domain.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
