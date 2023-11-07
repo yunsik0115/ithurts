@@ -34,6 +34,7 @@ dependencies {
 	implementation 'org.hibernate:hibernate-spatial'
 	implementation 'org.json:json:20231013'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3'
+	// Java 8 date/time type `java.time.LocalTime` not supported by default
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.mysql:mysql-connector-j'
