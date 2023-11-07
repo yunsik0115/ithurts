@@ -13,20 +13,17 @@ import org.json.JSONObject;
 import org.json.XML;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.data.geo.Point;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
-import java.time.temporal.TemporalAccessor;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -87,49 +84,71 @@ public class OpenAPIPharmacyDataService {
             log.trace("{}", pharmacyDTO);
         }
 
+        List<Pharmacy> pharmacies1 = dtoToPharmacy(pharmacyDTOList);
+
 
         return true;
     }
 
     public List<Pharmacy> dtoToPharmacy(List<PharmacyDTO> pharmacyDTOS){
+        log.trace("=================DTO TO PHARMACY TRANSFERRATION ==============");
         Pharmacy pharmacy = new Pharmacy();
-
+        List<Pharmacy> entityTransferredPharmacyList = new ArrayList<>();
         for (PharmacyDTO pharmacyDTO : pharmacyDTOS) {
             pharmacy.setName(pharmacyDTO.getDutyName());
             pharmacy.setContact(pharmacyDTO.getDutyTel1());
             pharmacy.setAddress(pharmacyDTO.getDutyAddr());
+            pharmacy.setOfficeTime(officeTimeExtractionFromDTOs(pharmacyDTO));
+            pharmacy.setCoordinates(new Point(pharmacyDTO.getWgs84Lat(), pharmacyDTO.getWgs84Lon()));
+            Pharmacy savedOne = pharmacyRepository.save(pharmacy);
+            log.trace("transfered.pharm = {}", savedOne);
+            entityTransferredPharmacyList.add(savedOne);
         }
-        //pharmacy.setOfficeDay();
 
-        return new ArrayList<>();
+        return entityTransferredPharmacyList;
     }
 
-    public Map<String, LocalTime> officeDayExtractionFromDTOs(PharmacyDTO pharmacyDTO){
+    public Map<String, LocalTime> officeTimeExtractionFromDTOs(PharmacyDTO pharmacyDTO){
 
         Map<String, LocalTime> officeDay = new HashMap<>();
-
         //c - 오전  s- 오후
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmm");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmm", Locale.KOREA);
         LocalTime mondayOPEN = LocalTime.parse(pharmacyDTO.getDutyTime1c(), formatter);
-        officeDay.put("monOPEN", mondayOPEN);
+        officeDay.put("mondayOPEN", mondayOPEN);
         LocalTime mondayCLOSED = LocalTime.parse(pharmacyDTO.getDutyTime1s(), formatter);
-        officeDay.put("mondCLOSED", mondayCLOSED);
-        LocalTime tuesdayOPEN = LocalTime.parse(pharmacyDTO.getDutyTime1c(), formatter);
-        officeDay.put("tueOPEN", tuesdayOPEN);
-        LocalTime tuesdayCLOSED = LocalTime.parse(pharmacyDTO.getDutyTime1c(), formatter);
-        officeDay.put("tueCLOSED", tuesdayCLOSED);
-        LocalTime wednesdayOPEN = LocalTime.parse(pharmacyDTO.getDutyTime1c(), formatter);
-        officeDay.put("wedOPEN", wednesdayOPEN);
-        LocalTime wednesdayCLOSED = LocalTime.parse(pharmacyDTO.getDutyTime1c(), formatter);
-        officeDay.put("wedCLOSED", wednesdayCLOSED);
-        LocalTime thursdayOPEN = LocalTime.parse(pharmacyDTO.getDutyTime1c(), formatter);
-        officeDay.put("thuOPEN", thursdayOPEN);
-        LocalTime thursdayCLOSED = LocalTime.parse(pharmacyDTO.getDutyTime1c(), formatter);
-        officeDay.put("thuCLOSED", thursdayCLOSED);
-        LocalTime fridayOPEN = LocalTime.parse(pharmacyDTO.getDutyTime1c(), formatter);
-        officeDay.put("friOPEN", fridayOPEN);
-        LocalTime fridayCLOSED = LocalTime.parse(pharmacyDTO.getDutyTime1c(), formatter);
-        officeDay.put("friCLOSED", fridayCLOSED);
+        officeDay.put("mondayCLOSED", mondayCLOSED);
+        LocalTime tuesdayOPEN = LocalTime.parse(pharmacyDTO.getDutyTime2c(), formatter);
+        officeDay.put("tuesdayOPEN", tuesdayOPEN);
+        LocalTime tuesdayCLOSED = LocalTime.parse(pharmacyDTO.getDutyTime2s(), formatter);
+        officeDay.put("tuesdayCLOSED", tuesdayCLOSED);
+        LocalTime wednesdayOPEN = LocalTime.parse(pharmacyDTO.getDutyTime3c(), formatter);
+        officeDay.put("wednesdayOPEN", wednesdayOPEN);
+        LocalTime wednesdayCLOSED = LocalTime.parse(pharmacyDTO.getDutyTime3s(), formatter);
+        officeDay.put("wednesdayCLOSED", wednesdayCLOSED);
+        LocalTime thursdayOPEN = LocalTime.parse(pharmacyDTO.getDutyTime4c(), formatter);
+        officeDay.put("thursdayOPEN", thursdayOPEN);
+        LocalTime thursdayCLOSED = LocalTime.parse(pharmacyDTO.getDutyTime4s(), formatter);
+        officeDay.put("thursdayCLOSED", thursdayCLOSED);
+        LocalTime fridayOPEN = LocalTime.parse(pharmacyDTO.getDutyTime5c(), formatter);
+        officeDay.put("fridayOPEN", fridayOPEN);
+        LocalTime fridayCLOSED = LocalTime.parse(pharmacyDTO.getDutyTime5s(), formatter);
+        officeDay.put("fridayCLOSED", fridayCLOSED);
+
+        if(pharmacyDTO.getDutyTime7c() != null && pharmacyDTO.getDutyTime7s() != null) {
+            LocalTime satSunOpen = LocalTime.parse(pharmacyDTO.getDutyTime7c(), formatter);
+            LocalTime satSunClosed = LocalTime.parse(pharmacyDTO.getDutyTime7s(), formatter);
+            officeDay.put("satSunOpen", satSunOpen);
+            officeDay.put("satSunClosed", satSunClosed);
+        }
+
+        if(pharmacyDTO.getDutyTime8c() != null && pharmacyDTO.getDutyTime8s() != null) {
+            LocalTime holidayOpen = LocalTime.parse(pharmacyDTO.getDutyTime8c(), formatter);
+            officeDay.put("holidayOpen", holidayOpen);
+            LocalTime holidayClosed = LocalTime.parse(pharmacyDTO.getDutyTime8s(), formatter);
+            officeDay.put("holidayClosed",holidayClosed);
+        }
+
+
 
         return officeDay;
     }

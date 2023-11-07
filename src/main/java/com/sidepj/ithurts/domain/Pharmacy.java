@@ -1,12 +1,14 @@
 package com.sidepj.ithurts.domain;
 
+import com.sidepj.ithurts.domain.converter.OfficeTimeToJsonConverter;
 import lombok.*;
-import org.hibernate.annotations.Type;
-import org.locationtech.jts.geom.Point;
+import org.springframework.data.geo.Point;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +21,7 @@ import java.util.Map;
 public class Pharmacy {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "pharmacy_id")
     private int id;
 
@@ -31,13 +34,10 @@ public class Pharmacy {
     @Column(name="pharmacy_address")
     private String address; //Embedded Class Address will be made - TO DO -
 
-    // OfficeDay - JSON으로 넣을것인가 / Column을 14개(공휴일 포함) 만들것인가?
-    @Column(name = "pharmacy_officeday")
-    private String officeDay;
-
-    @Type(type = "json")
-    @Column(name= "pharmacy_officetime", columnDefinition = "longtext")
-    private Map<String, Object> officeTime;
+    @Lob
+    @Column(name= "pharmacy_officetime")
+    @Convert(converter = OfficeTimeToJsonConverter.class)
+    private Map<String, LocalTime> officeTime = new HashMap<>();
 
     @Column(name = "pharmacy_coordinates")
     private Point coordinates;
@@ -48,11 +48,10 @@ public class Pharmacy {
     @Column(name = "pharmacy_created_date")
     private LocalDateTime createdDate;
 
-    public Pharmacy(String name, String contact, String address, String officeDay, Map<String, Object> officeTime, Point coordinates) {
+    public Pharmacy(String name, String contact, String address, Map<String, LocalTime> officeTime, Point coordinates) {
         this.name = name;
         this.contact = contact;
         this.address = address;
-        this.officeDay = officeDay;
         this.officeTime = officeTime;
         this.coordinates = coordinates;
     }
