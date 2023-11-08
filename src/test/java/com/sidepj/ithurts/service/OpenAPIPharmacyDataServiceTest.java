@@ -1,6 +1,7 @@
 package com.sidepj.ithurts.service;
 
 import com.sidepj.ithurts.domain.Pharmacy;
+import com.sidepj.ithurts.service.jsonparsingservice.OpenAPIPharmacyDataService;
 import com.sidepj.ithurts.service.searchConditions.SearchCondition;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;

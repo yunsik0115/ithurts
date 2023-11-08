@@ -1,14 +1,15 @@
 package com.sidepj.ithurts.domain;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalTime;
 
 @Entity
-@Data
 @NoArgsConstructor
+@Getter
+@Setter
+@ToString(exclude = {"hospital"})
 public class HospitalOfficeTime {
 
     @Id
@@ -29,5 +30,10 @@ public class HospitalOfficeTime {
         this.weekday = weekday;
         this.startOffice = startOffice;
         this.endOffice = endOffice;
+    }
+
+    public void setHospital(Hospital hospital){
+        this.hospital = hospital;
+        hospital.getOfficeTimes().add(this);
     }
 }

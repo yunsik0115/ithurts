@@ -1,9 +1,6 @@
 package com.sidepj.ithurts.domain;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.geo.Point;
 
 import javax.persistence.*;
@@ -13,6 +10,7 @@ import java.util.List;
 
 @Entity
 @NoArgsConstructor
+@ToString
 @Getter @Setter
 @Table(name = "hospitals")
 public class Hospital {
@@ -29,7 +27,7 @@ public class Hospital {
     private String contact;
 
     @Column(name="hospital_address")
-    private String Address; // To-Do Region으로 나누기
+    private String address; // To-Do Region으로 나누기
 
     @Column(name="hospital_type")
     private String hospitalType;
@@ -52,7 +50,7 @@ public class Hospital {
     private List<Report> reports = new ArrayList<>();
 
     public void addTime(HospitalOfficeTime hospitalOfficeTime){
-        this.getOfficeTimes().add(hospitalOfficeTime);
+        this.officeTimes.add(hospitalOfficeTime);
         hospitalOfficeTime.setHospital(this);
     }
 }
