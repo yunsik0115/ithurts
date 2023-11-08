@@ -16,10 +16,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.geo.Point;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.*;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -38,14 +40,28 @@ public class OpenAPIPharmacyDataService {
     @Value("${OPENAPI-Pharmacy-SecretKey}") // Lombok의 Value가 아님
     private String serviceKeyValue;
 
-    public boolean retrieveDataByCityName(String cityName) throws IOException {
+    public List<Pharmacy> retrieve(PharmacySearchCondition pharmacySearchCondition) throws IOException {
         log.trace("====== Start Retrieving Pharmacy Data By cityName From OPENAPI ======");
 
-        // == TO-DO Method Extraction Code Refactoring == //
+        JSONObject xmlJSONObj = getJsonObject(pharmacySearchCondition);
+        JSONArray pharmacies = xmlJSONObj.getJSONObject("response").getJSONObject("body").getJSONObject("items").getJSONArray("item");
+        JsonMapper jsonMapper = JsonMapper.builder().build();
+        List<PharmacyDTO> pharmacyDTOList = new ArrayList<>();
 
-        StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/B552657/ErmctInsttInfoInqireService/getParmacyListInfoInqire"); /*URL*/
-        urlBuilder.append("?").append(URLEncoder.encode("serviceKey", "UTF-8")).append("=").append(serviceKeyValue); /*Service Key*/
-        urlBuilder.append("&").append(URLEncoder.encode("Q0", "UTF-8")).append("=").append(URLEncoder.encode(cityName, "UTF-8")); /*주소(시도)*/
+        log.trace("===========PharmacyDTOs Creation============");
+        for(int i = 0; i < pharmacies.length(); i++){
+            JSONObject pharmacy = pharmacies.getJSONObject(i);
+            String pharmacyJSONString = pharmacy.toString();
+            PharmacyDTO pharmacyDTO = jsonMapper.readValue(pharmacyJSONString, PharmacyDTO.class);
+            pharmacyDTOList.add(pharmacyDTO);
+            log.trace("{}", pharmacyDTO);
+        }
+
+        return dtoToPharmacy(pharmacyDTOList);
+    }
+
+    private JSONObject getJsonObject(PharmacySearchCondition pharmacySearchCondition) throws IOException {
+        StringBuilder urlBuilder = getUrlBySearchCondition(pharmacySearchCondition);
         URL url = new URL(urlBuilder.toString());
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
@@ -71,23 +87,43 @@ public class OpenAPIPharmacyDataService {
         JSONObject xmlJSONObj = XML.toJSONObject(sb.toString());
         log.trace("==========JSON STRING FROM OPENAPI============");
         log.trace("{}", xmlJSONObj.toString());
-        JSONArray pharmacies = xmlJSONObj.getJSONObject("response").getJSONObject("body").getJSONObject("items").getJSONArray("item");
-        JsonMapper jsonMapper = JsonMapper.builder().build();
-        List<PharmacyDTO> pharmacyDTOList = new ArrayList<>();
+        return xmlJSONObj;
+    }
 
-        log.trace("===========PharmacyDTOs Creation============");
-        for(int i = 0; i < pharmacies.length(); i++){
-            JSONObject pharmacy = pharmacies.getJSONObject(i);
-            String pharmacyJSONString = pharmacy.toString();
-            PharmacyDTO pharmacyDTO = jsonMapper.readValue(pharmacyJSONString, PharmacyDTO.class);
-            pharmacyDTOList.add(pharmacyDTO);
-            log.trace("{}", pharmacyDTO);
+    private StringBuilder getUrlBySearchCondition(PharmacySearchCondition pharmacySearchCondition) throws UnsupportedEncodingException {
+        StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/B552657/ErmctInsttInfoInqireService/getParmacyListInfoInqire"); /*URL*/
+        urlBuilder.append("?").append(URLEncoder.encode("serviceKey", "UTF-8")).append("=").append(serviceKeyValue); /*Service Key*/
+
+         /*주소(시도)*/
+        if(StringUtils.hasText(pharmacySearchCondition.getQ0())){ // 주소 (시도)
+            urlBuilder.append("&").append(URLEncoder.encode("Q0", "UTF-8")).append("=").append(URLEncoder.encode(pharmacySearchCondition.getQ0(), "UTF-8"));
         }
 
-        List<Pharmacy> pharmacies1 = dtoToPharmacy(pharmacyDTOList);
+        if(StringUtils.hasText(pharmacySearchCondition.getQ1())){ // 주소 (시군구)
+            urlBuilder.append("&").append(URLEncoder.encode("Q1", "UTF-8")).append("=").append(URLEncoder.encode(pharmacySearchCondition.getQ1(), "UTF-8"));
+        }
 
+        if(StringUtils.hasText(pharmacySearchCondition.getQN())){ // 기관명
+            urlBuilder.append("&").append(URLEncoder.encode("QN", "UTF-8")).append("=").append(URLEncoder.encode(pharmacySearchCondition.getQN(), "UTF-8"));
+        }
 
-        return true;
+        if(pharmacySearchCondition.getQT() != null){ // 진료 요일
+            urlBuilder.append("&").append(URLEncoder.encode("QT", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(pharmacySearchCondition.getQT()), "UTF-8"));
+        }
+
+        if(pharmacySearchCondition.getORD() != null){ // 순서
+            urlBuilder.append("&").append(URLEncoder.encode("ORD", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(pharmacySearchCondition.getORD()), "UTF-8"));
+        }
+
+        if(pharmacySearchCondition.getPageNo() != null){ // 페이지 번호
+            urlBuilder.append("&").append(URLEncoder.encode("pageNo", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(pharmacySearchCondition.getPageNo()), "UTF-8"));
+        }
+
+        if(pharmacySearchCondition.getNumOfRows() != null){ // 받아올 건수
+            urlBuilder.append("&").append(URLEncoder.encode("numOfRows", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(pharmacySearchCondition.getNumOfRows()), "UTF-8"));
+        }
+
+        return urlBuilder;
     }
 
     public List<Pharmacy> dtoToPharmacy(List<PharmacyDTO> pharmacyDTOS){

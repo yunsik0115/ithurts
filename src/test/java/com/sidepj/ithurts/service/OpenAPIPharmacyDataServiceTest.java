@@ -1,27 +1,29 @@
 package com.sidepj.ithurts.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sidepj.ithurts.domain.Pharmacy;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
+import java.util.List;
 
 @SpringBootTest
 class OpenAPIPharmacyDataServiceTest {
 
     @Autowired
-    OpenAPIPharmacyDataService op;
+    OpenAPIPharmacyDataService pharmacyDataService;
 
     @Test
-    void openAPITest() throws JsonProcessingException {
-        try {
-            op.retrieveDataByCityName("서울특별시");
-            op.retrieveDataByCityName("구리시");
-            op.retrieveDataByCityName("안양시");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    void openAPITest() throws IOException {
+
+        PharmacySearchCondition pharmacySearchCondition = PharmacySearchCondition.builder()
+                        .Q0("서울특별시").Q1("광진구").build();
+
+        List<Pharmacy> retrieve = pharmacyDataService.retrieve(pharmacySearchCondition);
+
+        Assertions.assertThat(retrieve).isNotEmpty();
     }
 
 }
