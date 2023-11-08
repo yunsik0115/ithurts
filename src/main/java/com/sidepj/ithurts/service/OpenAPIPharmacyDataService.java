@@ -34,7 +34,7 @@ import java.util.*;
 @Slf4j
 @RequiredArgsConstructor
 @PropertySource("classpath:API-KEY.yml")
-public class OpenAPIPharmacyDataService {
+public class OpenAPIPharmacyDataService implements OpenAPIDataService<Pharmacy>{
 
     private final PharmacyRepository pharmacyRepository;
     private final PharmacyOfficeTimeRepository pharmacyOfficeTimeRepository;
@@ -43,6 +43,7 @@ public class OpenAPIPharmacyDataService {
     @Value("${OPENAPI-Pharmacy-SecretKey}") // Lombok의 Value가 아님
     private String serviceKeyValue;
 
+    @Override
     public List<Pharmacy> retrieve(SearchCondition SearchCondition) throws IOException {
         log.trace("====== Start Retrieving Pharmacy Data From OPENAPI ======");
 
