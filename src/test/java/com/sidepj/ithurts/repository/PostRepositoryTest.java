@@ -2,13 +2,15 @@ package com.sidepj.ithurts.repository;
 
 import com.sidepj.ithurts.domain.Member;
 import com.sidepj.ithurts.domain.Post;
+import org.aspectj.lang.annotation.Before;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.annotation.Commit;
+import org.springframework.test.context.event.annotation.BeforeTestExecution;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -20,18 +22,21 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PostRepositoryTest {
 
     @Autowired
-    MemberRepository memberRepository;
+    private MemberRepository memberRepository;
     @Autowired
-    PostRepository postRepository;
+    private PostRepository postRepository;
+
+
 
     @PersistenceContext
     EntityManager em;
 
-    @BeforeEach
-    void beforeEach() {
+    @BeforeAll
+    void before() {
         Member member = new Member("Yunsik", "xxxxxx");
         Post post1 = new Post("postTest1", "test content 1", member);
         Post post2 = new Post("postTest2", "test content 2", member);
@@ -55,7 +60,6 @@ class PostRepositoryTest {
         postRepository.save(post8);
         postRepository.save(post9);
         postRepository.save(post10);
-
     }
 
     @Test

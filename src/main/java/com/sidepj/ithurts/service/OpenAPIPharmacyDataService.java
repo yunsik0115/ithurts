@@ -7,6 +7,7 @@ import com.sidepj.ithurts.domain.Pharmacy;
 import com.sidepj.ithurts.repository.PharmacyOfficeTimeRepository;
 import com.sidepj.ithurts.repository.PharmacyRepository;
 import com.sidepj.ithurts.service.jsonparsingdto.PharmacyDTO;
+import com.sidepj.ithurts.service.searchConditions.SearchCondition;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
@@ -42,10 +43,10 @@ public class OpenAPIPharmacyDataService {
     @Value("${OPENAPI-Pharmacy-SecretKey}") // Lombok의 Value가 아님
     private String serviceKeyValue;
 
-    public List<Pharmacy> retrieve(PharmacySearchCondition pharmacySearchCondition) throws IOException {
+    public List<Pharmacy> retrieve(SearchCondition SearchCondition) throws IOException {
         log.trace("====== Start Retrieving Pharmacy Data From OPENAPI ======");
 
-        JSONObject xmlJSONObj = getJsonObject(pharmacySearchCondition);
+        JSONObject xmlJSONObj = getJsonObject(SearchCondition);
         JSONArray pharmacies = xmlJSONObj.getJSONObject("response").getJSONObject("body").getJSONObject("items").getJSONArray("item");
         JsonMapper jsonMapper = JsonMapper.builder().build();
         List<PharmacyDTO> pharmacyDTOList = new ArrayList<>();
@@ -64,8 +65,8 @@ public class OpenAPIPharmacyDataService {
         return dtoToPharmacy(pharmacyDTOList);
     }
 
-    private JSONObject getJsonObject(PharmacySearchCondition pharmacySearchCondition) throws IOException {
-        StringBuilder urlBuilder = getUrlBySearchCondition(pharmacySearchCondition);
+    private JSONObject getJsonObject(SearchCondition SearchCondition) throws IOException {
+        StringBuilder urlBuilder = getUrlBySearchCondition(SearchCondition);
         URL url = new URL(urlBuilder.toString());
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
@@ -94,36 +95,36 @@ public class OpenAPIPharmacyDataService {
         return xmlJSONObj;
     }
 
-    private StringBuilder getUrlBySearchCondition(PharmacySearchCondition pharmacySearchCondition) throws UnsupportedEncodingException {
+    private StringBuilder getUrlBySearchCondition(SearchCondition searchCondition ) throws UnsupportedEncodingException {
         StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/B552657/ErmctInsttInfoInqireService/getParmacyListInfoInqire"); /*URL*/
         urlBuilder.append("?").append(URLEncoder.encode("serviceKey", "UTF-8")).append("=").append(serviceKeyValue); /*Service Key*/
 
-        if(StringUtils.hasText(pharmacySearchCondition.getCity())){ // 주소 (시도)
-            urlBuilder.append("&").append(URLEncoder.encode("Q0", "UTF-8")).append("=").append(URLEncoder.encode(pharmacySearchCondition.getCity(), "UTF-8"));
+        if(StringUtils.hasText(searchCondition.getCity())){ // 주소 (시도)
+            urlBuilder.append("&").append(URLEncoder.encode("Q0", "UTF-8")).append("=").append(URLEncoder.encode(searchCondition.getCity(), "UTF-8"));
         }
 
-        if(StringUtils.hasText(pharmacySearchCondition.getDetailedCity())){ // 주소 (시군구)
-            urlBuilder.append("&").append(URLEncoder.encode("Q1", "UTF-8")).append("=").append(URLEncoder.encode(pharmacySearchCondition.getDetailedCity(), "UTF-8"));
+        if(StringUtils.hasText(searchCondition.getDetailedCity())){ // 주소 (시군구)
+            urlBuilder.append("&").append(URLEncoder.encode("Q1", "UTF-8")).append("=").append(URLEncoder.encode(searchCondition.getDetailedCity(), "UTF-8"));
         }
 
-        if(StringUtils.hasText(pharmacySearchCondition.getOfficeName())){ // 기관명
-            urlBuilder.append("&").append(URLEncoder.encode("QN", "UTF-8")).append("=").append(URLEncoder.encode(pharmacySearchCondition.getOfficeName(), "UTF-8"));
+        if(StringUtils.hasText(searchCondition.getOfficeName())){ // 기관명
+            urlBuilder.append("&").append(URLEncoder.encode("QN", "UTF-8")).append("=").append(URLEncoder.encode(searchCondition.getOfficeName(), "UTF-8"));
         }
 
-        if(pharmacySearchCondition.getOfficeDay() != null){ // 진료 요일
-            urlBuilder.append("&").append(URLEncoder.encode("QT", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(pharmacySearchCondition.getOfficeDay()), "UTF-8"));
+        if(searchCondition.getOfficeDay() != null){ // 진료 요일
+            urlBuilder.append("&").append(URLEncoder.encode("QT", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(searchCondition.getOfficeDay()), "UTF-8"));
         }
 
-        if(pharmacySearchCondition.getOrder() != null){ // 순서
-            urlBuilder.append("&").append(URLEncoder.encode("ORD", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(pharmacySearchCondition.getOrder()), "UTF-8"));
+        if(searchCondition.getOrder() != null){ // 순서
+            urlBuilder.append("&").append(URLEncoder.encode("ORD", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(searchCondition.getOrder()), "UTF-8"));
         }
 
-        if(pharmacySearchCondition.getPageNo() != null){ // 페이지 번호
-            urlBuilder.append("&").append(URLEncoder.encode("pageNo", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(pharmacySearchCondition.getPageNo()), "UTF-8"));
+        if(searchCondition.getPageNo() != null){ // 페이지 번호
+            urlBuilder.append("&").append(URLEncoder.encode("pageNo", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(searchCondition.getPageNo()), "UTF-8"));
         }
 
-        if(pharmacySearchCondition.getNumOfRows() != null){ // 받아올 건수
-            urlBuilder.append("&").append(URLEncoder.encode("numOfRows", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(pharmacySearchCondition.getNumOfRows()), "UTF-8"));
+        if(searchCondition.getNumOfRows() != null){ // 받아올 건수
+            urlBuilder.append("&").append(URLEncoder.encode("numOfRows", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(searchCondition.getNumOfRows()), "UTF-8"));
         }
 
         return urlBuilder;

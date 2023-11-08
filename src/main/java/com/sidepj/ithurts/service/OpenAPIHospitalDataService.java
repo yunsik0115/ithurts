@@ -7,6 +7,7 @@ import com.sidepj.ithurts.domain.HospitalOfficeTime;
 import com.sidepj.ithurts.repository.HospitalRepository;
 import com.sidepj.ithurts.repository.HospitalOfficeTimeRepository;
 import com.sidepj.ithurts.service.jsonparsingdto.HospitalDTO;
+import com.sidepj.ithurts.service.searchConditions.SearchCondition;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
@@ -37,7 +38,7 @@ import java.util.Locale;
 @Slf4j
 @PropertySource("classpath:API-KEY.yml")
 @RequiredArgsConstructor
-public class OpenAPIHospitalDataService {
+public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> {
 
     private final HospitalRepository hospitalRepository;
     private final HospitalOfficeTimeRepository hospitalOfficeTimeRepository;
@@ -49,10 +50,10 @@ public class OpenAPIHospitalDataService {
 
     // TO - DO DTO Transfering logic HERE //
 
-    public List<Hospital> retrieve(HospitalSearchCondition hospitalSearchCondition) throws IOException {
+    public List<Hospital> retrieve(SearchCondition searchCondition) throws IOException{
         log.trace("====== Start Retrieving Hospital Data From OPENAPI ======");
 
-        JSONObject xmlJSONObj = getJsonObject(hospitalSearchCondition);
+        JSONObject xmlJSONObj = getJsonObject(searchCondition);
         JSONArray hospitals = xmlJSONObj.getJSONObject("response").getJSONObject("body").getJSONObject("items").getJSONArray("item");
         JsonMapper jsonMapper = JsonMapper.builder().build();
         List<HospitalDTO> hospitalDTOList = new ArrayList<>();
@@ -71,8 +72,8 @@ public class OpenAPIHospitalDataService {
         return dtoToHospital(hospitalDTOList);
     }
 
-    private JSONObject getJsonObject(HospitalSearchCondition hospitalSearchCondition) throws IOException {
-        StringBuilder urlBuilder = getUrlBySearchCondition(hospitalSearchCondition);
+    private JSONObject getJsonObject(SearchCondition searchCondition) throws IOException {
+        StringBuilder urlBuilder = getUrlBySearchCondition(searchCondition);
         URL url = new URL(urlBuilder.toString());
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
@@ -101,42 +102,42 @@ public class OpenAPIHospitalDataService {
         return xmlJSONObj;
     }
 
-    private StringBuilder getUrlBySearchCondition(HospitalSearchCondition hospitalSearchCondition) throws UnsupportedEncodingException {
+    private StringBuilder getUrlBySearchCondition(SearchCondition searchCondition) throws UnsupportedEncodingException {
         StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/B552657/HsptlAsembySearchService/getHsptlMdcncListInfoInqire"); /*URL*/
         urlBuilder.append("?").append(URLEncoder.encode("serviceKey", "UTF-8")).append("=").append(serviceKeyValue); /*Service Key*/
 
         /*주소(시도)*/
-        if(StringUtils.hasText(hospitalSearchCondition.getCity())){ // 주소 (시도)
-            urlBuilder.append("&").append(URLEncoder.encode("Q0", "UTF-8")).append("=").append(URLEncoder.encode(hospitalSearchCondition.getCity(), "UTF-8"));
+        if(StringUtils.hasText(searchCondition.getCity())){ // 주소 (시도)
+            urlBuilder.append("&").append(URLEncoder.encode("Q0", "UTF-8")).append("=").append(URLEncoder.encode(searchCondition.getCity(), "UTF-8"));
         }
 
-        if(StringUtils.hasText(hospitalSearchCondition.getDetailedCity())){ // 주소 (시군구)
-            urlBuilder.append("&").append(URLEncoder.encode("Q1", "UTF-8")).append("=").append(URLEncoder.encode(hospitalSearchCondition.getDetailedCity(), "UTF-8"));
+        if(StringUtils.hasText(searchCondition.getDetailedCity())){ // 주소 (시군구)
+            urlBuilder.append("&").append(URLEncoder.encode("Q1", "UTF-8")).append("=").append(URLEncoder.encode(searchCondition.getDetailedCity(), "UTF-8"));
         }
 
-        if(StringUtils.hasText(hospitalSearchCondition.getServicePart())){ // 주소 (시군구)
-            urlBuilder.append("&").append(URLEncoder.encode("QZ", "UTF-8")).append("=").append(URLEncoder.encode(hospitalSearchCondition.getServicePart(), "UTF-8"));
+        if(StringUtils.hasText(searchCondition.getServicePart())){ // 주소 (시군구)
+            urlBuilder.append("&").append(URLEncoder.encode("QZ", "UTF-8")).append("=").append(URLEncoder.encode(searchCondition.getServicePart(), "UTF-8"));
         }
 
 
-        if(StringUtils.hasText(hospitalSearchCondition.getOfficeName())){ // 기관명
-            urlBuilder.append("&").append(URLEncoder.encode("QN", "UTF-8")).append("=").append(URLEncoder.encode(hospitalSearchCondition.getOfficeName(), "UTF-8"));
+        if(StringUtils.hasText(searchCondition.getOfficeName())){ // 기관명
+            urlBuilder.append("&").append(URLEncoder.encode("QN", "UTF-8")).append("=").append(URLEncoder.encode(searchCondition.getOfficeName(), "UTF-8"));
         }
 
-        if(hospitalSearchCondition.getOfficeDay() != null){ // 진료 요일
-            urlBuilder.append("&").append(URLEncoder.encode("QT", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(hospitalSearchCondition.getOfficeDay()), "UTF-8"));
+        if(searchCondition.getOfficeDay() != null){ // 진료 요일
+            urlBuilder.append("&").append(URLEncoder.encode("QT", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(searchCondition.getOfficeDay()), "UTF-8"));
         }
 
-        if(hospitalSearchCondition.getOrder() != null){ // 순서
-            urlBuilder.append("&").append(URLEncoder.encode("ORD", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(hospitalSearchCondition.getOrder()), "UTF-8"));
+        if(searchCondition.getOrder() != null){ // 순서
+            urlBuilder.append("&").append(URLEncoder.encode("ORD", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(searchCondition.getOrder()), "UTF-8"));
         }
 
-        if(hospitalSearchCondition.getPageNo() != null){ // 페이지 번호
-            urlBuilder.append("&").append(URLEncoder.encode("pageNo", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(hospitalSearchCondition.getPageNo()), "UTF-8"));
+        if(searchCondition.getPageNo() != null){ // 페이지 번호
+            urlBuilder.append("&").append(URLEncoder.encode("pageNo", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(searchCondition.getPageNo()), "UTF-8"));
         }
 
-        if(hospitalSearchCondition.getNumOfRows() != null){ // 받아올 건수
-            urlBuilder.append("&").append(URLEncoder.encode("numOfRows", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(hospitalSearchCondition.getNumOfRows()), "UTF-8"));
+        if(searchCondition.getNumOfRows() != null){ // 받아올 건수
+            urlBuilder.append("&").append(URLEncoder.encode("numOfRows", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(searchCondition.getNumOfRows()), "UTF-8"));
         }
 
         return urlBuilder;
@@ -229,4 +230,5 @@ public class OpenAPIHospitalDataService {
         hospital.addTime(holiday);
 
     }
+
 }
