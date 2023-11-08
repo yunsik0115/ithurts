@@ -101,9 +101,6 @@ public class OpenAPIPharmacyDataService {
             pharmacy.setCoordinates(new Point(pharmacyDTO.getWgs84Lat(), pharmacyDTO.getWgs84Lon()));
             Pharmacy savedOne = pharmacyRepository.save(pharmacy);
             officeTimeInjectionFromDTOs(pharmacyDTO, pharmacy);
-            for (OfficeTime officeTime : pharmacy.getOfficeTime()) {
-                System.out.println("officeTime.toString() = " + officeTime.toString());
-            }
             log.trace("transfered.pharm = {}", savedOne);
             entityTransferredPharmacyList.add(savedOne);
         }
@@ -119,7 +116,6 @@ public class OpenAPIPharmacyDataService {
         LocalTime mondayOPEN = LocalTime.parse(pharmacyDTO.getDutyTime1c(), formatter);
         LocalTime mondayCLOSED = LocalTime.parse(pharmacyDTO.getDutyTime1s(), formatter);
         OfficeTime mon = new OfficeTime("monday", mondayOPEN, mondayCLOSED, pharmacy);
-
         officeTimeRepository.save(mon);
         pharmacy.addTime(mon);
 
