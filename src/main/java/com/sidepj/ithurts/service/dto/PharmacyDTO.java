@@ -11,6 +11,8 @@ import lombok.*;
 @ToString
 public class PharmacyDTO {
 
+    // API Parsing용 DTO (DTO -> Entity 변환 메서드 - OpenAPIPharmacyDataService 참고
+
     private String dutyAddr; // 주소
     private String dutyName; // 약국 이름
     private String dutyTel1; // 대표 전화 1
