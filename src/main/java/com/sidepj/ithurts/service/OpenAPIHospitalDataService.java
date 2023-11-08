@@ -6,7 +6,7 @@ import com.sidepj.ithurts.domain.Hospital;
 import com.sidepj.ithurts.domain.HospitalOfficeTime;
 import com.sidepj.ithurts.repository.HospitalRepository;
 import com.sidepj.ithurts.repository.HospitalOfficeTimeRepository;
-import com.sidepj.ithurts.service.dto.HospitalDTO;
+import com.sidepj.ithurts.service.jsonparsingdto.HospitalDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
@@ -18,6 +18,7 @@ import org.springframework.data.geo.Point;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import javax.transaction.Transactional;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.Locale;
 
 @Service
+@Transactional
 @Slf4j
 @PropertySource("classpath:API-KEY.yml")
 @RequiredArgsConstructor
@@ -47,7 +49,7 @@ public class OpenAPIHospitalDataService {
 
     // TO - DO DTO Transfering logic HERE //
 
-    public List<Hospital> retrieveAll(HospitalSearchCondition hospitalSearchCondition) throws IOException {
+    public List<Hospital> retrieve(HospitalSearchCondition hospitalSearchCondition) throws IOException {
         log.trace("====== Start Retrieving Hospital Data From OPENAPI ======");
 
         JSONObject xmlJSONObj = getJsonObject(hospitalSearchCondition);

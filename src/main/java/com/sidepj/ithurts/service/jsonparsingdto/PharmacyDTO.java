@@ -1,7 +1,6 @@
-package com.sidepj.ithurts.service.dto;
+package com.sidepj.ithurts.service.jsonparsingdto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 @Builder
@@ -10,13 +9,13 @@ import lombok.*;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @ToString
-public class HospitalDTO {// API Parsing용 DTO (DTO -> Entity 변환 메서드 - OpenAPIHospitalDataService 참고
+public class PharmacyDTO {
+
+    // API Parsing용 DTO (DTO -> Entity 변환 메서드 - OpenAPIPharmacyDataService 참고
 
     private String dutyAddr; // 주소
-
     private String dutyName; // 약국 이름
     private String dutyTel1; // 대표 전화 1
-    private String dutyDivName; // 병원 분류
 
     // c: 오전 s: 오후 - OPENAPI Spec
     private String dutyTime1c;

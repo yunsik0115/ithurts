@@ -3,11 +3,10 @@ package com.sidepj.ithurts.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.sidepj.ithurts.domain.PharmacyOfficeTime;
-import com.sidepj.ithurts.domain.PharmacyOfficeTime;
 import com.sidepj.ithurts.domain.Pharmacy;
 import com.sidepj.ithurts.repository.PharmacyOfficeTimeRepository;
 import com.sidepj.ithurts.repository.PharmacyRepository;
-import com.sidepj.ithurts.service.dto.PharmacyDTO;
+import com.sidepj.ithurts.service.jsonparsingdto.PharmacyDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
@@ -19,6 +18,7 @@ import org.springframework.data.geo.Point;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import javax.transaction.Transactional;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -28,6 +28,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+@Transactional
 @Service
 @Slf4j
 @RequiredArgsConstructor

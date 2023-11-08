@@ -21,7 +21,7 @@ class OpenAPIHospitalDataServiceTest {
                 .city("서울특별시")
                 .detailedCity("광진구")
                 .build();
-        List<Hospital> hospitals = openAPIHospitalDataService.retrieveAll(hospitalSearchCondition);
+        List<Hospital> hospitals = openAPIHospitalDataService.retrieve(hospitalSearchCondition);
 
         Assertions.assertThat(hospitals).isNotEmpty();
     }
