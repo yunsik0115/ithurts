@@ -1,8 +1,10 @@
 package com.sidepj.ithurts.domain;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.locationtech.jts.geom.Point;
+import lombok.Setter;
+import org.springframework.data.geo.Point;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -10,11 +12,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
+@Getter @Setter
 @Table(name = "hospitals")
 public class Hospital {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name="hospital_id")
     private Long id;
 
@@ -30,11 +34,8 @@ public class Hospital {
     @Column(name="hospital_type")
     private String hospitalType;
 
-    @Column(name="hospital_officeday")
-    private String officeDay;
-
-    @Column(name = "hospital_officetime")
-    private String officeTime;
+    @OneToMany(mappedBy = "hospital")
+    private List<HospitalOfficeTime> officeTimes = new ArrayList<>();
 
     @Column(name = "hospital_coordinates")
     private Point coordinates;
@@ -49,4 +50,9 @@ public class Hospital {
 
     @OneToMany(mappedBy = "hospital")
     private List<Report> reports = new ArrayList<>();
+
+    public void addTime(HospitalOfficeTime hospitalOfficeTime){
+        this.getOfficeTimes().add(hospitalOfficeTime);
+        hospitalOfficeTime.setHospital(this);
+    }
 }

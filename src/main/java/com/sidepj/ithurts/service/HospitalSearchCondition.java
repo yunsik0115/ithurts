@@ -1,13 +1,17 @@
 package com.sidepj.ithurts.service;
 
+
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
-public class PharmacySearchCondition {
+public class HospitalSearchCondition {
+
     private String city; // 주소 (시도)
     private String detailedCity; // 주소 (시군구)
+
+    private String servicePart; // 진료과목
 
     private String officeName; // 기관명
     private Integer officeDay; // 진료요일

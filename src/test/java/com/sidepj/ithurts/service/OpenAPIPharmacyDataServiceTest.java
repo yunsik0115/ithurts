@@ -19,7 +19,7 @@ class OpenAPIPharmacyDataServiceTest {
     void openAPITest() throws IOException {
 
         PharmacySearchCondition pharmacySearchCondition = PharmacySearchCondition.builder()
-                        .Q0("서울특별시").Q1("광진구").build();
+                        .city("서울특별시").detailedCity("광진구").build();
 
         List<Pharmacy> retrieve = pharmacyDataService.retrieve(pharmacySearchCondition);
 

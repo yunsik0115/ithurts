@@ -9,14 +9,14 @@ import java.time.LocalTime;
 @Entity
 @Data
 @NoArgsConstructor
-public class OfficeTime {
+public class HospitalOfficeTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @ManyToOne
-    private Pharmacy pharmacy;
+    private Hospital hospital;
 
     private String weekday;
 
@@ -24,8 +24,8 @@ public class OfficeTime {
 
     private LocalTime endOffice;
 
-    public OfficeTime(String weekday, LocalTime startOffice, LocalTime endOffice, Pharmacy pharmacy) {
-        this.pharmacy = pharmacy;
+    public HospitalOfficeTime(String weekday, LocalTime startOffice, LocalTime endOffice, Hospital hospital) {
+        this.hospital = hospital;
         this.weekday = weekday;
         this.startOffice = startOffice;
         this.endOffice = endOffice;

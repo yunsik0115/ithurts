@@ -2,9 +2,10 @@ package com.sidepj.ithurts.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.sidepj.ithurts.domain.OfficeTime;
+import com.sidepj.ithurts.domain.PharmacyOfficeTime;
+import com.sidepj.ithurts.domain.PharmacyOfficeTime;
 import com.sidepj.ithurts.domain.Pharmacy;
-import com.sidepj.ithurts.repository.OfficeTimeRepository;
+import com.sidepj.ithurts.repository.PharmacyOfficeTimeRepository;
 import com.sidepj.ithurts.repository.PharmacyRepository;
 import com.sidepj.ithurts.service.dto.PharmacyDTO;
 import lombok.RequiredArgsConstructor;
@@ -34,14 +35,14 @@ import java.util.*;
 public class OpenAPIPharmacyDataService {
 
     private final PharmacyRepository pharmacyRepository;
-    private final OfficeTimeRepository officeTimeRepository;
+    private final PharmacyOfficeTimeRepository pharmacyOfficeTimeRepository;
     private final ObjectMapper objectMapper;
 
     @Value("${OPENAPI-Pharmacy-SecretKey}") // Lombok의 Value가 아님
     private String serviceKeyValue;
 
     public List<Pharmacy> retrieve(PharmacySearchCondition pharmacySearchCondition) throws IOException {
-        log.trace("====== Start Retrieving Pharmacy Data By cityName From OPENAPI ======");
+        log.trace("====== Start Retrieving Pharmacy Data From OPENAPI ======");
 
         JSONObject xmlJSONObj = getJsonObject(pharmacySearchCondition);
         JSONArray pharmacies = xmlJSONObj.getJSONObject("response").getJSONObject("body").getJSONObject("items").getJSONArray("item");
@@ -56,6 +57,8 @@ public class OpenAPIPharmacyDataService {
             pharmacyDTOList.add(pharmacyDTO);
             log.trace("{}", pharmacyDTO);
         }
+
+        log.trace("============Pharmacy DTO Entity Transformation Completed ============");
 
         return dtoToPharmacy(pharmacyDTOList);
     }
@@ -94,25 +97,24 @@ public class OpenAPIPharmacyDataService {
         StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/B552657/ErmctInsttInfoInqireService/getParmacyListInfoInqire"); /*URL*/
         urlBuilder.append("?").append(URLEncoder.encode("serviceKey", "UTF-8")).append("=").append(serviceKeyValue); /*Service Key*/
 
-         /*주소(시도)*/
-        if(StringUtils.hasText(pharmacySearchCondition.getQ0())){ // 주소 (시도)
-            urlBuilder.append("&").append(URLEncoder.encode("Q0", "UTF-8")).append("=").append(URLEncoder.encode(pharmacySearchCondition.getQ0(), "UTF-8"));
+        if(StringUtils.hasText(pharmacySearchCondition.getCity())){ // 주소 (시도)
+            urlBuilder.append("&").append(URLEncoder.encode("Q0", "UTF-8")).append("=").append(URLEncoder.encode(pharmacySearchCondition.getCity(), "UTF-8"));
         }
 
-        if(StringUtils.hasText(pharmacySearchCondition.getQ1())){ // 주소 (시군구)
-            urlBuilder.append("&").append(URLEncoder.encode("Q1", "UTF-8")).append("=").append(URLEncoder.encode(pharmacySearchCondition.getQ1(), "UTF-8"));
+        if(StringUtils.hasText(pharmacySearchCondition.getDetailedCity())){ // 주소 (시군구)
+            urlBuilder.append("&").append(URLEncoder.encode("Q1", "UTF-8")).append("=").append(URLEncoder.encode(pharmacySearchCondition.getDetailedCity(), "UTF-8"));
         }
 
-        if(StringUtils.hasText(pharmacySearchCondition.getQN())){ // 기관명
-            urlBuilder.append("&").append(URLEncoder.encode("QN", "UTF-8")).append("=").append(URLEncoder.encode(pharmacySearchCondition.getQN(), "UTF-8"));
+        if(StringUtils.hasText(pharmacySearchCondition.getOfficeName())){ // 기관명
+            urlBuilder.append("&").append(URLEncoder.encode("QN", "UTF-8")).append("=").append(URLEncoder.encode(pharmacySearchCondition.getOfficeName(), "UTF-8"));
         }
 
-        if(pharmacySearchCondition.getQT() != null){ // 진료 요일
-            urlBuilder.append("&").append(URLEncoder.encode("QT", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(pharmacySearchCondition.getQT()), "UTF-8"));
+        if(pharmacySearchCondition.getOfficeDay() != null){ // 진료 요일
+            urlBuilder.append("&").append(URLEncoder.encode("QT", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(pharmacySearchCondition.getOfficeDay()), "UTF-8"));
         }
 
-        if(pharmacySearchCondition.getORD() != null){ // 순서
-            urlBuilder.append("&").append(URLEncoder.encode("ORD", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(pharmacySearchCondition.getORD()), "UTF-8"));
+        if(pharmacySearchCondition.getOrder() != null){ // 순서
+            urlBuilder.append("&").append(URLEncoder.encode("ORD", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(pharmacySearchCondition.getOrder()), "UTF-8"));
         }
 
         if(pharmacySearchCondition.getPageNo() != null){ // 페이지 번호
@@ -126,7 +128,7 @@ public class OpenAPIPharmacyDataService {
         return urlBuilder;
     }
 
-    public List<Pharmacy> dtoToPharmacy(List<PharmacyDTO> pharmacyDTOS){
+    private List<Pharmacy> dtoToPharmacy(List<PharmacyDTO> pharmacyDTOS){
         log.trace("=================DTO TO PHARMACY TRANSFERRATION ==============");
         Pharmacy pharmacy = new Pharmacy();
         List<Pharmacy> entityTransferredPharmacyList = new ArrayList<>();
@@ -144,55 +146,72 @@ public class OpenAPIPharmacyDataService {
         return entityTransferredPharmacyList;
     }
 
-    public void officeTimeInjectionFromDTOs(PharmacyDTO pharmacyDTO, Pharmacy pharmacy){
+    private void officeTimeInjectionFromDTOs(PharmacyDTO pharmacyDTO, Pharmacy pharmacy){
 
-        List<OfficeTime> officeTimes = new ArrayList<>();
-        //c - 오전  s- 오후
+        List<PharmacyOfficeTime> pharmacyOfficeTimes = new ArrayList<>();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmm", Locale.KOREA);
-        LocalTime mondayOPEN = LocalTime.parse(pharmacyDTO.getDutyTime1c(), formatter);
-        LocalTime mondayCLOSED = LocalTime.parse(pharmacyDTO.getDutyTime1s(), formatter);
-        OfficeTime mon = new OfficeTime("monday", mondayOPEN, mondayCLOSED, pharmacy);
-        officeTimeRepository.save(mon);
+        //c - 오후  s- 오전
+        PharmacyOfficeTime mon = new PharmacyOfficeTime("monday", null, null, pharmacy);
+        if(pharmacyDTO.getDutyTime1s() != null || pharmacyDTO.getDutyTime1c() != null) {
+            LocalTime mondayOPEN = LocalTime.parse(pharmacyDTO.getDutyTime1s(), formatter);
+            LocalTime mondayCLOSED = LocalTime.parse(pharmacyDTO.getDutyTime1c(), formatter);
+            mon = new PharmacyOfficeTime("monday", mondayOPEN, mondayCLOSED, pharmacy);
+        }
+        pharmacyOfficeTimeRepository.save(mon);
         pharmacy.addTime(mon);
 
-        LocalTime tuesdayOPEN = LocalTime.parse(pharmacyDTO.getDutyTime2c(), formatter);
-        LocalTime tuesdayCLOSED = LocalTime.parse(pharmacyDTO.getDutyTime2s(), formatter);
-        OfficeTime tue = new OfficeTime("tuesday", tuesdayOPEN, tuesdayCLOSED, pharmacy);
-        officeTimeRepository.save(tue);
+        PharmacyOfficeTime tue = new PharmacyOfficeTime("tuesday", null, null, pharmacy);
+        if(pharmacyDTO.getDutyTime2c() != null && pharmacyDTO.getDutyTime2s() != null) {
+            LocalTime tuesdayOPEN = LocalTime.parse(pharmacyDTO.getDutyTime2s(), formatter);
+            LocalTime tuesdayCLOSED = LocalTime.parse(pharmacyDTO.getDutyTime2c(), formatter);
+            tue = new PharmacyOfficeTime("tuesday", tuesdayOPEN, tuesdayCLOSED, pharmacy);
+        }
+        pharmacyOfficeTimeRepository.save(tue);
         pharmacy.addTime(tue);
 
-        LocalTime wednesdayOPEN = LocalTime.parse(pharmacyDTO.getDutyTime3c(), formatter);
-        LocalTime wednesdayCLOSED = LocalTime.parse(pharmacyDTO.getDutyTime3s(), formatter);
-        OfficeTime wed = new OfficeTime("wednesday", wednesdayOPEN, wednesdayCLOSED, pharmacy);
-        officeTimeRepository.save(wed);
+        PharmacyOfficeTime wed = new PharmacyOfficeTime("wednesday", null, null, pharmacy);
+        if(pharmacyDTO.getDutyTime3s() != null && pharmacyDTO.getDutyTime3c() != null) {
+            LocalTime wednesdayOPEN = LocalTime.parse(pharmacyDTO.getDutyTime3s(), formatter);
+            LocalTime wednesdayCLOSED = LocalTime.parse(pharmacyDTO.getDutyTime3c(), formatter);
+            wed = new PharmacyOfficeTime("wednesday", wednesdayOPEN, wednesdayCLOSED, pharmacy);
+        }
+        pharmacyOfficeTimeRepository.save(wed);
         pharmacy.addTime(wed);
 
-        LocalTime thursdayOPEN = LocalTime.parse(pharmacyDTO.getDutyTime4c(), formatter);
-        LocalTime thursdayCLOSED = LocalTime.parse(pharmacyDTO.getDutyTime4s(), formatter);
-        OfficeTime thu = new OfficeTime("thursday", thursdayOPEN, thursdayCLOSED, pharmacy);
-        officeTimeRepository.save(thu);
+        PharmacyOfficeTime thu = new PharmacyOfficeTime("thursday", null, null, pharmacy);
+        if(pharmacyDTO.getDutyTime4s() != null && pharmacyDTO.getDutyTime4c() != null) {
+            LocalTime thursdayOPEN = LocalTime.parse(pharmacyDTO.getDutyTime4s(), formatter);
+            LocalTime thursdayCLOSED = LocalTime.parse(pharmacyDTO.getDutyTime4c(), formatter);
+            thu = new PharmacyOfficeTime("thursday", thursdayOPEN, thursdayCLOSED, pharmacy);
+        }
+        pharmacyOfficeTimeRepository.save(thu);
         pharmacy.addTime(thu);
 
-        LocalTime fridayOPEN = LocalTime.parse(pharmacyDTO.getDutyTime5c(), formatter);
-        LocalTime fridayCLOSED = LocalTime.parse(pharmacyDTO.getDutyTime5s(), formatter);
-        OfficeTime fri = new OfficeTime("friday", fridayOPEN, fridayCLOSED, pharmacy);
-        pharmacy.addTime(fri);
-        OfficeTime satSun = new OfficeTime("satsun", null, null, pharmacy);
-        if(pharmacyDTO.getDutyTime7c() != null && pharmacyDTO.getDutyTime7s() != null) {
-            LocalTime satSunOpen = LocalTime.parse(pharmacyDTO.getDutyTime7c(), formatter);
-            LocalTime satSunClosed = LocalTime.parse(pharmacyDTO.getDutyTime7s(), formatter);
-            satSun = new OfficeTime("satsun", satSunOpen, satSunClosed, pharmacy);
+        PharmacyOfficeTime fri = new PharmacyOfficeTime("thursday", null, null, pharmacy);
+        if(pharmacyDTO.getDutyTime5s() != null && pharmacyDTO.getDutyTime5c() != null) {
+            LocalTime fridayOPEN = LocalTime.parse(pharmacyDTO.getDutyTime5s(), formatter);
+            LocalTime fridayCLOSED = LocalTime.parse(pharmacyDTO.getDutyTime5c(), formatter);
+            fri = new PharmacyOfficeTime("friday", fridayOPEN, fridayCLOSED, pharmacy);
         }
-        officeTimeRepository.save(satSun);
+        pharmacyOfficeTimeRepository.save(fri);
+        pharmacy.addTime(fri);
+
+        PharmacyOfficeTime satSun = new PharmacyOfficeTime("satsun", null, null, pharmacy);
+        if(pharmacyDTO.getDutyTime7s() != null && pharmacyDTO.getDutyTime7c() != null) {
+            LocalTime satSunOpen = LocalTime.parse(pharmacyDTO.getDutyTime7s(), formatter);
+            LocalTime satSunClosed = LocalTime.parse(pharmacyDTO.getDutyTime7c(), formatter);
+            satSun = new PharmacyOfficeTime("satsun", satSunOpen, satSunClosed, pharmacy);
+        }
+        pharmacyOfficeTimeRepository.save(satSun);
         pharmacy.addTime(satSun);
 
-        OfficeTime holiday = new OfficeTime("holiday", null, null, pharmacy);
-        if(pharmacyDTO.getDutyTime8c() != null && pharmacyDTO.getDutyTime8s() != null) {
-            LocalTime holidayOpen = LocalTime.parse(pharmacyDTO.getDutyTime8c(), formatter);
-            LocalTime holidayClosed = LocalTime.parse(pharmacyDTO.getDutyTime8s(), formatter);
-            holiday = new OfficeTime("holiday", holidayOpen, holidayClosed, pharmacy);
+        PharmacyOfficeTime holiday = new PharmacyOfficeTime("holiday", null, null, pharmacy);
+        if(pharmacyDTO.getDutyTime8s() != null && pharmacyDTO.getDutyTime8c() != null) {
+            LocalTime holidayOpen = LocalTime.parse(pharmacyDTO.getDutyTime8s(), formatter);
+            LocalTime holidayClosed = LocalTime.parse(pharmacyDTO.getDutyTime8c(), formatter);
+            holiday = new PharmacyOfficeTime("holiday", holidayOpen, holidayClosed, pharmacy);
         }
-        officeTimeRepository.save(holiday);
+        pharmacyOfficeTimeRepository.save(holiday);
         pharmacy.addTime(holiday);
 
     }

@@ -40,16 +40,16 @@ public class Pharmacy {
     private LocalDateTime createdDate;
 
     @OneToMany(mappedBy = "pharmacy")
-    private List<OfficeTime> officeTime = new ArrayList<>();
+    private List<PharmacyOfficeTime> pharmacyOfficeTime = new ArrayList<>();
 
     // private boolean is_available; 서비스 단에서 처리
 
     @OneToMany(mappedBy = "pharmacy")
     private List<Report> reports = new ArrayList<>();
 
-    public void addTime(OfficeTime officeTime){
-        this.officeTime.add(officeTime);
-        officeTime.setPharmacy(this);
+    public void addTime(PharmacyOfficeTime pharmacyOfficeTime){
+        this.pharmacyOfficeTime.add(pharmacyOfficeTime);
+        pharmacyOfficeTime.setPharmacy(this);
 
     }
 
