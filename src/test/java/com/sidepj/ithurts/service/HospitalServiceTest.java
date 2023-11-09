@@ -34,8 +34,8 @@ class HospitalServiceTest {
 
     @Test
     void searchByName() {
-        //Hospital hospital = hospitalDataService.searchByName("");
-        //System.out.println("hospital.toString() = " + hospital.toString());
+        List<Hospital> hospital = hospitalDataService.searchByName("대한산업보건협회군산산업보건센타군산서해의원");
+        System.out.println("hospital.toString() = " + hospital.toString());
     }
 
     @Test

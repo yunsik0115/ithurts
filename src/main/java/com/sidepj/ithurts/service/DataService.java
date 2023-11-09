@@ -1,5 +1,6 @@
 package com.sidepj.ithurts.service;
 
+import com.sidepj.ithurts.domain.Hospital;
 import com.sidepj.ithurts.service.searchConditions.SearchCondition;
 
 import java.util.List;
@@ -10,7 +11,7 @@ public interface DataService<T> {
     // DB에서 가져온 결과가 N건 미만인 경우 OpenAPIDataService를 통해 파싱하여 가져옴
     // N건 이상인 경우 OpenAPIDataService 사용 X - 네트워크 트래픽 감소를 위함.
 
-    public T searchByName(String officeName); // 이름에 의해 찾기
+    public List<T> searchByName(String officeName); // 이름에 의해 찾기
 
     public List<T> searchByCity(String cityName); // 도시에 의해 찾기
 

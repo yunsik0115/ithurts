@@ -23,11 +23,11 @@ public class PharmacyService implements DataService<Pharmacy> {
     private final OpenAPIDataService<Pharmacy> openAPIPharmacyDataService;
 
     @Override
-    public Pharmacy searchByName(String officeName) {
-        Pharmacy retrievedFromDB = pharmacyRepository.findByName(officeName).get(0);
-        if(retrievedFromDB == null){
+    public List<Pharmacy> searchByName(String officeName) {
+        List<Pharmacy> retrievedFromDB = pharmacyRepository.findByName(officeName);
+        if(retrievedFromDB.isEmpty()){
             SearchCondition sc = SearchCondition.builder().officeName(officeName).build();
-            Pharmacy retrieve = openAPIPharmacyDataService.retrieveOne(sc);
+            List<Pharmacy> retrieve = openAPIPharmacyDataService.retrieve(sc);
             // DB에 Persist는 이미 완료된 상태
             return retrieve;
         }

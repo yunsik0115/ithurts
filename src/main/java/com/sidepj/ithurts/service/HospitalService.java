@@ -19,12 +19,12 @@ public class HospitalService implements DataService<Hospital> {
     private final OpenAPIDataService<Hospital> openAPIHospitalDataService;
 
     @Override
-    public Hospital searchByName(String officeName) {
-        Hospital retrievedFromDB = hospitalRepository.findByName(officeName).get(0);
-        if(retrievedFromDB == null){
+    public List<Hospital> searchByName(String officeName) {
+        List<Hospital> retrievedFromDB = hospitalRepository.findByName(officeName);
+        if(retrievedFromDB.isEmpty()){
             SearchCondition sc = SearchCondition.builder().officeName(officeName).build();
             // DB에 Persist는 이미 완료된 상태
-            return openAPIHospitalDataService.retrieveOne(sc);
+            return openAPIHospitalDataService.retrieve(sc);
         }
         return retrievedFromDB;
     }

@@ -1,6 +1,7 @@
 package com.sidepj.ithurts.service.jsonparsingservice;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.sidepj.ithurts.domain.Hospital;
@@ -12,6 +13,7 @@ import com.sidepj.ithurts.service.searchConditions.SearchCondition;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,7 +46,7 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
     private final HospitalRepository hospitalRepository;
     private final HospitalOfficeTimeRepository hospitalOfficeTimeRepository;
 
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     @Value("${OPENAPI-Hospital-SecretKey}") // Lombok의 Value가 아님
     private String serviceKeyValue;
@@ -61,7 +63,20 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
             throw new RuntimeException(e);
         }
         log.trace("xmljsonobj = {}", xmlJSONObj);
-        JSONArray hospitals = xmlJSONObj.getJSONObject("response").getJSONObject("body").getJSONObject("items").getJSONArray("item");
+
+        JSONArray hospitals;
+        Object itemObj = xmlJSONObj.getJSONObject("response").getJSONObject("body").getJSONObject("items").get("item");
+
+        // JSON 객체와 배열 모두 처리
+        if (itemObj instanceof JSONArray) {
+            hospitals = (JSONArray) itemObj;
+        } else if (itemObj instanceof JSONObject) {
+            hospitals = new JSONArray();
+            hospitals.put((JSONObject) itemObj);
+        } else {
+            throw new JSONException("item key is neither a JSONObject nor a JSONArray");
+        }
+
         JsonMapper jsonMapper = JsonMapper.builder().build();
         List<HospitalDTO> hospitalDTOList = new ArrayList<>();
 
@@ -85,27 +100,31 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
         return dtosToHospital(hospitalDTOList);
     }
 
-    @Override
-    public Hospital retrieveOne(SearchCondition searchCondition){
-        log.trace("====== Start Retrieving Hospital Datas From OPENAPI ======");
-
-        JSONObject xmlJSONObj = null;
-        try {
-            xmlJSONObj = getJsonObject(searchCondition);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        log.trace("xmljsonobj = {}", xmlJSONObj);
-        JSONObject hospital = xmlJSONObj.getJSONObject("response").getJSONObject("body").getJSONObject("items").getJSONObject("item");
-        JsonMapper jsonMapper = JsonMapper.builder().build();
-        String hospitalJSONString = hospital.toString();
-        try {
-            HospitalDTO hospitalDTO = objectMapper.readValue(hospitalJSONString, HospitalDTO.class);
-            return dtoToHospital(hospitalDTO);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
+//    @Override
+//    public Hospital retrieveOne(SearchCondition searchCondition){
+//        log.trace("====== Start Retrieving Hospital Datas From OPENAPI ======");
+//
+//        JSONObject xmlJSONObj = null;
+//        try {
+//            xmlJSONObj = getJsonObject(searchCondition);
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//        log.trace("xmljsonobj = {}", xmlJSONObj);
+//        try {
+//            JSONObject hospital = xmlJSONObj.getJSONObject("response").getJSONObject("body").getJSONObject("items").getJSONObject("item");
+//            JsonMapper jsonMapper = JsonMapper.builder().build();
+//            String hospitalJSONString = hospital.toString();
+//            HospitalDTO hospitalDTO = objectMapper.readValue(hospitalJSONString, HospitalDTO.class);
+//            return dtoToHospital(hospitalDTO);
+//        } catch (JSONException e){
+//            throw new IllegalArgumentException("검색 결과가 없습니다");
+//        } catch (JsonMappingException e) {
+//            throw new RuntimeException(e);
+//        } catch (JsonProcessingException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 
     private JSONObject getJsonObject(SearchCondition searchCondition) throws IOException {
         StringBuilder urlBuilder = getUrlBySearchCondition(searchCondition);
@@ -188,7 +207,9 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
             hospital.setName(hospitalDTO.getDutyName());
             hospital.setContact(hospitalDTO.getDutyTel1());
             hospital.setAddress(hospitalDTO.getDutyAddr());
-            hospital.setCoordinates(new Point(hospitalDTO.getWgs84Lat(), hospitalDTO.getWgs84Lon()));
+            if(hospitalDTO.getWgs84Lat() != null && hospitalDTO.getWgs84Lon() != null) {
+                hospital.setCoordinates(new Point(hospitalDTO.getWgs84Lat(), hospitalDTO.getWgs84Lon()));
+            }
             Hospital savedOne = hospitalRepository.save(hospital);
             officeTimeInjectionFromDTOs(hospitalDTO, savedOne);
             log.trace("transfered.pharm = {}", savedOne);
@@ -196,20 +217,6 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
         }
 
         return hospitalTransferedhospitalList;
-    }
-
-    private Hospital dtoToHospital(HospitalDTO hospitalDTO){
-        log.trace("=================DTO TO Hospital TRANSFERRATION ==============");
-        Hospital hospital = new Hospital();
-        hospital.setName(hospitalDTO.getDutyName());
-        hospital.setContact(hospitalDTO.getDutyTel1());
-        hospital.setAddress(hospitalDTO.getDutyAddr());
-        hospital.setCoordinates(new Point(hospitalDTO.getWgs84Lat(), hospitalDTO.getWgs84Lon()));
-
-        officeTimeInjectionFromDTOs(hospitalDTO, hospital);
-        Hospital savedOne = hospitalRepository.save(hospital);
-
-        return savedOne;
     }
 
     private void officeTimeInjectionFromDTOs(HospitalDTO hospitalDTO, Hospital hospital){

@@ -13,6 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.transaction.Transactional;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -37,14 +39,26 @@ class PharmacyServiceTest {
 
     @Test
     void searchByName() {
-        //pharmacyDataService.searchByName("365동서약국");
+        List<Pharmacy> pharmacies = pharmacyDataService.searchByName("365동서약국");
+        for (Pharmacy pharmacy : pharmacies) {
+            System.out.println("pharmacy = " + pharmacy.toString());
+        }
     }
 
     @Test
     void searchByCity() {
+        List<Pharmacy> pharmacies = pharmacyDataService.searchByCity("서울시");
+        for (Pharmacy pharmacy : pharmacies) {
+            System.out.println("pharmacy = " + pharmacy.toString());
+        }
     }
 
     @Test
     void searchByDetailedCity() {
+        List<Pharmacy> pharmacies = pharmacyDataService.searchByDetailedCity("서울시", "광진구");
+        for (Pharmacy pharmacy : pharmacies) {
+            System.out.println("pharmacy = " + pharmacy.toString());
+        }
+
     }
 }

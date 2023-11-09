@@ -12,6 +12,7 @@ import com.sidepj.ithurts.service.searchConditions.SearchCondition;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,7 +55,20 @@ public class OpenAPIPharmacyDataService implements OpenAPIDataService<Pharmacy>{
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        JSONArray pharmacies = xmlJSONObj.getJSONObject("response").getJSONObject("body").getJSONObject("items").getJSONArray("item");
+
+        JSONArray pharmacies;
+        Object itemObj = xmlJSONObj.getJSONObject("response").getJSONObject("body").getJSONObject("items").get("item");
+
+        if(itemObj instanceof JSONArray){
+            pharmacies = (JSONArray) itemObj;
+        } else if(itemObj instanceof JSONObject){
+            pharmacies = new JSONArray();
+            pharmacies.put((JSONObject) itemObj);
+        } else{
+            throw new JSONException("item key is neither a JSONObject nor a JSONArray");
+        }
+
+
         JsonMapper jsonMapper = JsonMapper.builder().build();
         List<PharmacyDTO> pharmacyDTOList = new ArrayList<>();
 
@@ -77,26 +91,26 @@ public class OpenAPIPharmacyDataService implements OpenAPIDataService<Pharmacy>{
         return dtosToPharmacy(pharmacyDTOList);
     }
 
-    public Pharmacy retrieveOne(SearchCondition searchCondition){
-        log.trace("====== Start Retrieving Hospital Datas From OPENAPI ======");
-
-        JSONObject xmlJSONObj = null;
-        try {
-            xmlJSONObj = getJsonObject(searchCondition);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        log.trace("xmljsonobj = {}", xmlJSONObj);
-        JSONObject pharmacy = xmlJSONObj.getJSONObject("response").getJSONObject("body").getJSONObject("items").getJSONObject("item");
-        JsonMapper jsonMapper = JsonMapper.builder().build();
-        String pharmacyJSONString = pharmacy.toString();
-        try {
-            PharmacyDTO pharmacyDTO = objectMapper.readValue(pharmacyJSONString, PharmacyDTO.class);
-            return dtoToPharmacy(pharmacyDTO);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
+//    public Pharmacy retrieveOne(SearchCondition searchCondition){
+//        log.trace("====== Start Retrieving Hospital Datas From OPENAPI ======");
+//
+//        JSONObject xmlJSONObj = null;
+//        try {
+//            xmlJSONObj = getJsonObject(searchCondition);
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//        log.trace("xmljsonobj = {}", xmlJSONObj);
+//        JSONObject pharmacy = xmlJSONObj.getJSONObject("response").getJSONObject("body").getJSONObject("items").getJSONObject("item");
+//        JsonMapper jsonMapper = JsonMapper.builder().build();
+//        String pharmacyJSONString = pharmacy.toString();
+//        try {
+//            PharmacyDTO pharmacyDTO = objectMapper.readValue(pharmacyJSONString, PharmacyDTO.class);
+//            return dtoToPharmacy(pharmacyDTO);
+//        } catch (JsonProcessingException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 
     private JSONObject getJsonObject(SearchCondition SearchCondition) throws IOException {
         StringBuilder urlBuilder = getUrlBySearchCondition(SearchCondition);
@@ -171,7 +185,9 @@ public class OpenAPIPharmacyDataService implements OpenAPIDataService<Pharmacy>{
             pharmacy.setName(pharmacyDTO.getDutyName());
             pharmacy.setContact(pharmacyDTO.getDutyTel1());
             pharmacy.setAddress(pharmacyDTO.getDutyAddr());
-            pharmacy.setCoordinates(new Point(pharmacyDTO.getWgs84Lat(), pharmacyDTO.getWgs84Lon()));
+            if(pharmacyDTO.getWgs84Lon() != null && pharmacyDTO.getWgs84Lat()!=null) {
+                pharmacy.setCoordinates(new Point(pharmacyDTO.getWgs84Lat(), pharmacyDTO.getWgs84Lon()));
+            }
             Pharmacy savedOne = pharmacyRepository.save(pharmacy);
             officeTimeInjectionFromDTOs(pharmacyDTO, pharmacy);
             log.trace("transfered.pharm = {}", savedOne);
@@ -179,19 +195,6 @@ public class OpenAPIPharmacyDataService implements OpenAPIDataService<Pharmacy>{
         }
 
         return entityTransferredPharmacyList;
-    }
-
-    private Pharmacy dtoToPharmacy(PharmacyDTO pharmacyDTO){
-        log.trace("=================DTO TO PHARMACY TRANSFERRATION ==============");
-        Pharmacy pharmacy = new Pharmacy();
-        pharmacy.setName(pharmacyDTO.getDutyName());
-        pharmacy.setContact(pharmacyDTO.getDutyTel1());
-        pharmacy.setAddress(pharmacyDTO.getDutyAddr());
-        pharmacy.setCoordinates(new Point(pharmacyDTO.getWgs84Lat(), pharmacyDTO.getWgs84Lon()));
-        Pharmacy savedOne = pharmacyRepository.save(pharmacy);
-        officeTimeInjectionFromDTOs(pharmacyDTO, pharmacy);
-        log.trace("transfered.pharm = {}", savedOne);
-        return savedOne;
     }
 
     private void officeTimeInjectionFromDTOs(PharmacyDTO pharmacyDTO, Pharmacy pharmacy){
