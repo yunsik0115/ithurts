@@ -13,7 +13,7 @@ public interface PostService {
 
     Post getPost(Long id);
 
-    boolean removePost(Post post);
+    void removePost(Post post);
 
     List<Post> getAllPosts();
 

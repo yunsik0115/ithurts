@@ -36,4 +36,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Query("select count(*) from Post p JOIN Love l where p.id = :id")
     int getLoveCount(Long id);
+
+
 }

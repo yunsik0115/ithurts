@@ -22,9 +22,8 @@ public class PostServiceImpl implements PostService{
     }
 
     @Override
-    public boolean removePost(Post post) {
-        // == TO - DO == //
-        return false;
+    public void removePost(Post post) {
+        postRepository.delete(post);
     }
 
     @Override
@@ -39,7 +38,7 @@ public class PostServiceImpl implements PostService{
 
     @Override
     public List<Post> getPostByName(String name) {
-        return postRepository.findPostsByMemberName(name);
+        return postRepository.findPostsByPostName(name);
     }
 
     @Override
