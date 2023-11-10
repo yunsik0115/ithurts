@@ -25,4 +25,10 @@ public class MemberDTO {
         this.role = member.getRole();
         this.lastPwdChanged = member.getLastPwdChanged();
     }
+
+    public MemberDTO(String username, String password, String role) {
+        this.username = username;
+        this.password = password;
+        this.role = role;
+    }
 }

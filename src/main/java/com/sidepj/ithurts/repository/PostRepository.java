@@ -31,7 +31,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     List<Post> findPostsByPostType(String postType);
 
-    void removePost(Long id);
+
+    void deletePostById(Long id);
 
     @Query("select count(*) from Post p JOIN Love l where p.id = :id")
     int getLoveCount(Long id);

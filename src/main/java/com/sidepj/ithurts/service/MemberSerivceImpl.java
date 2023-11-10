@@ -38,7 +38,7 @@ public class MemberSerivceImpl implements MemberService {
     @Override
     public Member join(MemberDTO memberDTO, String userRole) {
         checkMemberValidity(memberDTO, userRole);
-        return new Member(memberDTO, userRole);
+        return memberRepository.save(new Member(memberDTO, userRole));
     }
 
     private List<MemberDTO> getMemberDTOS(List<Member> allMembers) {
@@ -59,6 +59,12 @@ public class MemberSerivceImpl implements MemberService {
         }
         if(!StringUtils.hasText(userRole)){
             throw new IllegalArgumentException("권한 정보를 획득할 수 없습니다, 관리자에게 문의하세요");
+        }
+
+
+        Member memberByName = memberRepository.findMemberByName(memberDTO.getUsername());
+        if(memberByName != null){
+            throw new IllegalArgumentException("이미 동일한 이름의 계정이 존재합니다");
         }
     }
 }
