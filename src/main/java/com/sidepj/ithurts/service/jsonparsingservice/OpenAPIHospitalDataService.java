@@ -1,14 +1,13 @@
 package com.sidepj.ithurts.service.jsonparsingservice;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.sidepj.ithurts.domain.Hospital;
 import com.sidepj.ithurts.domain.HospitalOfficeTime;
 import com.sidepj.ithurts.repository.HospitalRepository;
 import com.sidepj.ithurts.repository.HospitalOfficeTimeRepository;
-import com.sidepj.ithurts.service.jsonparsingdto.HospitalDTO;
+import com.sidepj.ithurts.service.dto.jsonparsingdto.HospitalDTO;
 import com.sidepj.ithurts.service.searchConditions.SearchCondition;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -202,6 +201,7 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
 
         List<Hospital> hospitalTransferedhospitalList = new ArrayList<>();
         for (HospitalDTO hospitalDTO : hospitalDTOS) {
+
             Hospital hospital = new Hospital(); // 객체 생성은 반복할때마다 생성하지 않으면 Dirty Checking에 의해 기존 Row가 update 됨.
             hospital.setId(null);
             hospital.setName(hospitalDTO.getDutyName());

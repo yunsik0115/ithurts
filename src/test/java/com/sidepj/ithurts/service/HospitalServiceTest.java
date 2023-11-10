@@ -39,7 +39,6 @@ class HospitalServiceTest {
     }
 
     @Test
-    @Rollback(value = false)
     void searchByCity() {
         List<Hospital> hospitals = hospitalDataService.searchByCity("서울특별시");
         for (Hospital hospital : hospitals) {

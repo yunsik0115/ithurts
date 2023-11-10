@@ -7,7 +7,7 @@ import com.sidepj.ithurts.domain.PharmacyOfficeTime;
 import com.sidepj.ithurts.domain.Pharmacy;
 import com.sidepj.ithurts.repository.PharmacyOfficeTimeRepository;
 import com.sidepj.ithurts.repository.PharmacyRepository;
-import com.sidepj.ithurts.service.jsonparsingdto.PharmacyDTO;
+import com.sidepj.ithurts.service.dto.jsonparsingdto.PharmacyDTO;
 import com.sidepj.ithurts.service.searchConditions.SearchCondition;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

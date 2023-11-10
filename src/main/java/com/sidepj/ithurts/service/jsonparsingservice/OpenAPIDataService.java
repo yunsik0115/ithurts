@@ -13,5 +13,4 @@ public interface OpenAPIDataService<T> {
     public List<T> retrieve(SearchCondition searchCondition);
 
 //    public T retrieveOne(SearchCondition searchCondition);
-
 }

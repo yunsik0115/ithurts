@@ -1,5 +1,6 @@
 package com.sidepj.ithurts.domain;
 
+import com.sidepj.ithurts.service.dto.MemberDTO;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -54,5 +55,12 @@ public class Member {
     public Member(String name, String password) {
         this.name = name;
         this.password = password;
+    }
+
+    public Member(MemberDTO memberDTO, String userRole){
+        this.name = memberDTO.getUsername();
+        this.password = memberDTO.getPassword();
+        this.createdDate = LocalDateTime.now();
+        this.role = userRole;
     }
 }
