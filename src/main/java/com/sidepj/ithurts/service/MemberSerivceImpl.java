@@ -8,11 +8,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class MemberSerivceImpl implements MemberService {
 
     private final MemberRepository memberRepository;

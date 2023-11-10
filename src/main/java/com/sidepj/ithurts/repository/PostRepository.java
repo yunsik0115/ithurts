@@ -15,18 +15,24 @@ import java.util.List;
 public interface PostRepository extends JpaRepository<Post, Long> {
 
     // 모든 Post를 반환
-    Page<Post> findAll(Pageable pageable);
+    List<Post> findAll();
 
     // Post 이름을 기준으로 Post 검색
     @Query("select p from Post p where p.postName LIKE %:postName%")
-    Page<Post> findPostsByPostName(@Param("postName") String postName, Pageable pageable);
+    List<Post> findPostsByPostName(@Param("postName") String postName);
 
     // Member의 이름을 기준으로 Post 검색
     @Query("select p from Post p join p.postMember where p.postMember.name = :name")
-    Page<Post> findPostsByName(@Param("name") String name, Pageable pageable);
+    List<Post> findPostsByMemberName(@Param("name") String name);
 
     // searchContent의 내용이 content의 일부인 글들을 검색함.
     @Query("select p from Post p where p.content LIKE %:searchContent%")
-    Page<Post> findPostsByContent(@Param("searchContent") String searchContent, Pageable pageable);
+    List<Post> findPostsByContent(@Param("searchContent") String searchContent);
 
+    List<Post> findPostsByPostType(String postType);
+
+    void removePost(Long id);
+
+    @Query("select count(*) from Post p JOIN Love l where p.id = :id")
+    int getLoveCount(Long id);
 }
