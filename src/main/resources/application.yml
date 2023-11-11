@@ -17,8 +17,9 @@ spring:
 
 logging:
   level:
-    org.hibernate.sql: debug
-    org.hibernate.type: debug
-    root: trace
+    org.hibernate.sql: trace
+    org.hibernate.type: trace
+    root: info
+    com.sidepj.ithurts: trace
 
 
