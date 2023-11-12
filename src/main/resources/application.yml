@@ -7,7 +7,7 @@ spring:
   jpa:
     database: mysql
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create
     properties:
       hibernate:
         format_sql: true
@@ -17,8 +17,8 @@ spring:
 
 logging:
   level:
-    org.hibernate.sql: trace
-    org.hibernate.type: trace
+    org.hibernate.sql: info
+    org.hibernate.type: info
     root: info
     com.sidepj.ithurts: trace
 

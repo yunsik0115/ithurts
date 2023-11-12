@@ -4,8 +4,11 @@ import com.sidepj.ithurts.domain.Hospital;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.MultiValueMap;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 public interface HospitalRepository extends JpaRepository<Hospital, Long> {
@@ -18,7 +21,7 @@ public interface HospitalRepository extends JpaRepository<Hospital, Long> {
 
     public List<Hospital> findAll();
 
-    public Hospital findHospitalByNameAndAddress(String name, String address);
+    public Hospital findHospitalByNameAndAddressAndHospitalType(String name, String address, String hospitalType);
 
 
 }

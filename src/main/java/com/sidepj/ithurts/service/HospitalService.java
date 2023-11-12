@@ -81,7 +81,7 @@ public class HospitalService implements DataService<HospitalControllerDTO> {
 
     @Override
     public List<HospitalControllerDTO> retrieveAll() {
-        SearchCondition searchCondition = SearchCondition.builder().searchAll(true).build();
+        SearchCondition searchCondition = SearchCondition.builder().city("서울특별시").detailedCity("광진구").searchAll(true).build();
         return transferToDTO(openAPIHospitalDataService.retrieve(searchCondition));
     }
 

@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.geo.Point;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 import javax.transaction.Transactional;
@@ -34,6 +35,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -50,8 +52,8 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
     @Value("${OPENAPI-Hospital-SecretKey}") // Lombok의 Value가 아님
     private String serviceKeyValue;
 
-    // TO - DO DTO Transfering logic HERE //
 
+    // == 경고 == 전체 정보를 OPEN API로부터 새로 가져오는 로직에 해당 //
     public List<Hospital> retrieve(SearchCondition searchCondition){
         log.trace("====== Start Retrieving Hospital Datas From OPENAPI ======");
 
@@ -89,7 +91,8 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
         log.trace("============hospital DTO Entity Transformation Completed ============");
 
 
-        return dtosToHospital(hospitalDTOList);
+        List<Hospital> hospitalsConvertedToEntity = dtosToHospital(hospitalDTOList);
+        return save(hospitalsConvertedToEntity);
     }
 
     private static JSONArray jsonObjectArrayDeterminator(Object itemObj) {
@@ -133,80 +136,82 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
         return xmlJSONObj;
     }
 
-    private StringBuilder getUrlBySearchCondition(SearchCondition searchCondition) throws UnsupportedEncodingException {
-        StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/B552657/HsptlAsembySearchService/getHsptlMdcncListInfoInqire"); /*URL*/
-        urlBuilder.append("?").append(URLEncoder.encode("serviceKey", "UTF-8")).append("=").append(serviceKeyValue); /*Service Key*/
+    // 이 메서드는 쿼리를 통해 기존에 데이터가 존재하는 경우 더티체킹 / 벌크연산을 통해 업데이트
+    // 기존에 데이터가 없는 경우 HospitalRepository를 사용하여 em.persist 수행.
 
-        /*주소(시도)*/
-        if(StringUtils.hasText(searchCondition.getCity())){ // 주소 (시도)
-            urlBuilder.append("&").append(URLEncoder.encode("Q0", "UTF-8")).append("=").append(URLEncoder.encode(searchCondition.getCity(), "UTF-8"));
+    // TO - DO 받아오는게 200건이면 쿼리 200건 나감 //
+    // 전체 hospitalList를 받아 온 후, 식별자 비교로 가능한 내용은 dirtychecking을 통해 개선하는 로직 구현 필요 //
+    private List<Hospital> save(List<Hospital> hospitalList){
+        List<Hospital> all = new ArrayList<>();
+        for (Hospital hospital : hospitalList) {
+            if(hospitalRepository.findHospitalByNameAndAddressAndHospitalType(hospital.getName(), hospital.getAddress(), hospital.getHospitalType())!=null){
+                Hospital hospitalOnDB = hospitalRepository.findHospitalByNameAndAddressAndHospitalType(hospital.getName(), hospital.getAddress(), hospital.getHospitalType());
+                entityUpdateWithEntity(hospital, hospitalOnDB);
+                all.add(hospitalOnDB);
+            }
+            else{
+                all.add(hospitalRepository.save(hospital));
+            }
         }
-
-        if(StringUtils.hasText(searchCondition.getDetailedCity())){ // 주소 (시군구)
-            urlBuilder.append("&").append(URLEncoder.encode("Q1", "UTF-8")).append("=").append(URLEncoder.encode(searchCondition.getDetailedCity(), "UTF-8"));
-        }
-
-        if(StringUtils.hasText(searchCondition.getServicePart())){ // 주소 (시군구)
-            urlBuilder.append("&").append(URLEncoder.encode("QZ", "UTF-8")).append("=").append(URLEncoder.encode(searchCondition.getServicePart(), "UTF-8"));
-        }
-
-
-        if(StringUtils.hasText(searchCondition.getOfficeName())){ // 기관명
-            urlBuilder.append("&").append(URLEncoder.encode("QN", "UTF-8")).append("=").append(URLEncoder.encode(searchCondition.getOfficeName(), "UTF-8"));
-        }
-
-        if(searchCondition.getOfficeDay() != null){ // 진료 요일
-            urlBuilder.append("&").append(URLEncoder.encode("QT", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(searchCondition.getOfficeDay()), "UTF-8"));
-        }
-
-        if(searchCondition.getOrder() != null){ // 순서
-            urlBuilder.append("&").append(URLEncoder.encode("ORD", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(searchCondition.getOrder()), "UTF-8"));
-        }
-
-        if(searchCondition.getPageNo() != null){ // 페이지 번호
-            urlBuilder.append("&").append(URLEncoder.encode("pageNo", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(searchCondition.getPageNo()), "UTF-8"));
-        }
-
-        if(searchCondition.getSearchAll()) {
-            urlBuilder.append("&").append(URLEncoder.encode("numOfRows", "UTF-8")).append("=").append(Integer.toString(24467));
-        }
-
-
-        return urlBuilder;
+        return all;
     }
 
+    // 역할 분리, 이 메서드는 파싱되어진 DTO를 Hospital Entity로 교체하는 작업만 수행함
     private List<Hospital> dtosToHospital(List<HospitalDTO> hospitalDTOS){
         log.trace("=================DTO TO Hospital TRANSFERRATION ==============");
-
         List<Hospital> hospitalTransferedhospitalList = new ArrayList<>();
+        List<Hospital> all = hospitalRepository.findAll();
         for (HospitalDTO hospitalDTO : hospitalDTOS) {
-            Hospital savedOne = null;
-            // == TO DO 건당 쿼리가 1개씩 나감, 쿼리 20000개 나갈텐데 어떻게 해결? ==//
-            if(hospitalRepository.findHospitalByNameAndAddress(hospitalDTO.getDutyName(), hospitalDTO.getDutyAddr()) == null) {
-                Hospital hospital = new Hospital(); // 객체 생성은 반복할때마다 생성하지 않으면 Dirty Checking에 의해 기존 Row가 update 됨
-                entityInjectionFromDTO(hospitalDTO, hospital);
-                savedOne = hospitalRepository.save(hospital);
-            } else {
-                savedOne = hospitalRepository.findHospitalByNameAndAddress(hospitalDTO.getDutyName(), hospitalDTO.getDutyAddr()); // Update Column By Dirty Checking
-                entityInjectionFromDTO(hospitalDTO, savedOne);
-            }
-            officeTimeInjectionFromDTOs(hospitalDTO, savedOne);
-            hospitalTransferedhospitalList.add(savedOne);
+            Hospital hospital = new Hospital();
+            entityInjectionFromDTO(hospitalDTO, hospital);
+            hospitalTransferedhospitalList.add(hospital);
         }
 
         return hospitalTransferedhospitalList;
     }
 
+    // 이 메서드는 DTO필드로 부터 엔티티 필드에 정보를 주입하는 역할을 담당함
+    // TO - DO : NPE 방지를 위한 IF 로직 추가 필요
     private static void entityInjectionFromDTO(HospitalDTO hospitalDTO, Hospital hospital) {
-        hospital.setName(hospitalDTO.getDutyName());
-        hospital.setContact(hospitalDTO.getDutyTel1());
-        hospital.setAddress(hospitalDTO.getDutyAddr());
-        hospital.setHospitalType(hospitalDTO.getDutyDivNam());
+        if(hospitalDTO.getDutyName() != null) {
+            hospital.setName(hospitalDTO.getDutyName());
+        }
+        if(hospitalDTO.getDutyTel1() != null) {
+            hospital.setContact(hospitalDTO.getDutyTel1());
+        }
+        if(hospitalDTO.getDutyAddr() != null) {
+            hospital.setAddress(hospitalDTO.getDutyAddr());
+        }
+        if(hospitalDTO.getDutyDivNam() != null) {
+            hospital.setHospitalType(hospitalDTO.getDutyDivNam());
+        }
         if(hospitalDTO.getWgs84Lat() != null && hospitalDTO.getWgs84Lon() != null) {
             hospital.setCoordinates(new Point(hospitalDTO.getWgs84Lat(), hospitalDTO.getWgs84Lon()));
         }
     }
 
+    private static void entityUpdateWithEntity(Hospital from, Hospital to){
+        if(!from.getName().equals(to.getName())) {
+            to.setName(from.getName());
+        }
+        if(!from.getAddress().equals(to.getAddress())) {
+            to.setAddress(from.getAddress());
+        }
+        if(!from.getHospitalType().equals(to.getHospitalType())) {
+            to.setHospitalType(from.getHospitalType());
+        }
+        if(!from.getCoordinates().equals(to.getCoordinates())) {
+            to.setCoordinates(from.getCoordinates());
+        }
+        if(!from.getContact().equals(to.getCoordinates())) {
+            to.setContact(from.getContact());
+        }
+        if(!from.getOfficeTimes().equals(to.getOfficeTimes())) {
+            to.setOfficeTimes(from.getOfficeTimes());
+        }
+    }
+
+    // 이 메서드는 officeTime을 hospitalDTO로부터 별도의 HospitalOfficeTimeTable에 주입하기 위한 역할을 담당함.
     private void officeTimeInjectionFromDTOs(HospitalDTO hospitalDTO, Hospital hospital){
 
         List<HospitalOfficeTime> HospitalOfficeTimes = new ArrayList<>();
@@ -275,6 +280,50 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
         hospitalOfficeTimeRepository.save(holiday);
         hospital.addTime(holiday);
 
+    }
+
+
+    // 이 메서드는 검색 조건에 따른 OPENAPI URL을 생성함
+    private StringBuilder getUrlBySearchCondition(SearchCondition searchCondition) throws UnsupportedEncodingException {
+        StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/B552657/HsptlAsembySearchService/getHsptlMdcncListInfoInqire"); /*URL*/
+        urlBuilder.append("?").append(URLEncoder.encode("serviceKey", "UTF-8")).append("=").append(serviceKeyValue); /*Service Key*/
+
+        /*주소(시도)*/
+        if(StringUtils.hasText(searchCondition.getCity())){ // 주소 (시도)
+            urlBuilder.append("&").append(URLEncoder.encode("Q0", "UTF-8")).append("=").append(URLEncoder.encode(searchCondition.getCity(), "UTF-8"));
+        }
+
+        if(StringUtils.hasText(searchCondition.getDetailedCity())){ // 주소 (시군구)
+            urlBuilder.append("&").append(URLEncoder.encode("Q1", "UTF-8")).append("=").append(URLEncoder.encode(searchCondition.getDetailedCity(), "UTF-8"));
+        }
+
+        if(StringUtils.hasText(searchCondition.getServicePart())){ // 주소 (시군구)
+            urlBuilder.append("&").append(URLEncoder.encode("QZ", "UTF-8")).append("=").append(URLEncoder.encode(searchCondition.getServicePart(), "UTF-8"));
+        }
+
+
+        if(StringUtils.hasText(searchCondition.getOfficeName())){ // 기관명
+            urlBuilder.append("&").append(URLEncoder.encode("QN", "UTF-8")).append("=").append(URLEncoder.encode(searchCondition.getOfficeName(), "UTF-8"));
+        }
+
+        if(searchCondition.getOfficeDay() != null){ // 진료 요일
+            urlBuilder.append("&").append(URLEncoder.encode("QT", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(searchCondition.getOfficeDay()), "UTF-8"));
+        }
+
+        if(searchCondition.getOrder() != null){ // 순서
+            urlBuilder.append("&").append(URLEncoder.encode("ORD", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(searchCondition.getOrder()), "UTF-8"));
+        }
+
+        if(searchCondition.getPageNo() != null){ // 페이지 번호
+            urlBuilder.append("&").append(URLEncoder.encode("pageNo", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(searchCondition.getPageNo()), "UTF-8"));
+        }
+
+        if(searchCondition.getSearchAll()) {
+            urlBuilder.append("&").append(URLEncoder.encode("numOfRows", "UTF-8")).append("=").append(Integer.toString(24467));
+        }
+
+
+        return urlBuilder;
     }
 
     //    @Override
