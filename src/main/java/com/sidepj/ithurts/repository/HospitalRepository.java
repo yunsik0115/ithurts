@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.MultiValueMap;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,6 +23,5 @@ public interface HospitalRepository extends JpaRepository<Hospital, Long> {
     public List<Hospital> findAll();
 
     public Hospital findHospitalByNameAndAddressAndHospitalType(String name, String address, String hospitalType);
-
 
 }

@@ -46,7 +46,6 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
 
     private final HospitalRepository hospitalRepository;
     private final HospitalOfficeTimeRepository hospitalOfficeTimeRepository;
-
     private final ObjectMapper objectMapper;
 
     @Value("${OPENAPI-Hospital-SecretKey}") // Lombok의 Value가 아님
@@ -90,50 +89,8 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
 
         log.trace("============hospital DTO Entity Transformation Completed ============");
 
+        return save(dtosToHospital(hospitalDTOList));
 
-        List<Hospital> hospitalsConvertedToEntity = dtosToHospital(hospitalDTOList);
-        return save(hospitalsConvertedToEntity);
-    }
-
-    private static JSONArray jsonObjectArrayDeterminator(Object itemObj) {
-        JSONArray hospitals;
-        if (itemObj instanceof JSONArray) {
-            hospitals = (JSONArray) itemObj;
-        } else if (itemObj instanceof JSONObject) {
-            hospitals = new JSONArray();
-            hospitals.put((JSONObject) itemObj);
-        } else {
-            throw new JSONException("item key is neither a JSONObject nor a JSONArray");
-        }
-        return hospitals;
-    }
-
-    private JSONObject getJsonObject(SearchCondition searchCondition) throws IOException {
-        StringBuilder urlBuilder = getUrlBySearchCondition(searchCondition);
-        URL url = new URL(urlBuilder.toString());
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-        conn.setRequestProperty("Content-type", "application/json");
-
-        log.trace("Response code: {}" , conn.getResponseCode());
-        log.trace("url = {}", url);
-
-        BufferedReader rd;
-        if (conn.getResponseCode() >= 200 && conn.getResponseCode() <= 300) {
-            rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-        } else {
-            rd = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
-        }
-        StringBuilder sb = new StringBuilder();
-        String line;
-        while ((line = rd.readLine()) != null) {
-            sb.append(line);
-        }
-        rd.close();
-        conn.disconnect();
-
-        JSONObject xmlJSONObj = XML.toJSONObject(sb.toString());
-        return xmlJSONObj;
     }
 
     // 이 메서드는 쿼리를 통해 기존에 데이터가 존재하는 경우 더티체킹 / 벌크연산을 통해 업데이트
@@ -144,13 +101,14 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
     private List<Hospital> save(List<Hospital> hospitalList){
         List<Hospital> all = new ArrayList<>();
         for (Hospital hospital : hospitalList) {
-            if(hospitalRepository.findHospitalByNameAndAddressAndHospitalType(hospital.getName(), hospital.getAddress(), hospital.getHospitalType())!=null){
+            if(hospitalRepository.findHospitalByNameAndAddressAndHospitalType(hospital.getName(), hospital.getAddress(), hospital.getHospitalType()) == null){
+                all.add(hospitalRepository.save(hospital));
+                hospitalOfficeTimeRepository.saveAll(hospital.getOfficeTimes());
+            }
+            else{
                 Hospital hospitalOnDB = hospitalRepository.findHospitalByNameAndAddressAndHospitalType(hospital.getName(), hospital.getAddress(), hospital.getHospitalType());
                 entityUpdateWithEntity(hospital, hospitalOnDB);
                 all.add(hospitalOnDB);
-            }
-            else{
-                all.add(hospitalRepository.save(hospital));
             }
         }
         return all;
@@ -160,10 +118,10 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
     private List<Hospital> dtosToHospital(List<HospitalDTO> hospitalDTOS){
         log.trace("=================DTO TO Hospital TRANSFERRATION ==============");
         List<Hospital> hospitalTransferedhospitalList = new ArrayList<>();
-        List<Hospital> all = hospitalRepository.findAll();
         for (HospitalDTO hospitalDTO : hospitalDTOS) {
             Hospital hospital = new Hospital();
             entityInjectionFromDTO(hospitalDTO, hospital);
+            officeTimeInjectionFromDTOs(hospitalDTO, hospital);
             hospitalTransferedhospitalList.add(hospital);
         }
 
@@ -207,7 +165,7 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
             to.setContact(from.getContact());
         }
         if(!from.getOfficeTimes().equals(to.getOfficeTimes())) {
-            to.setOfficeTimes(from.getOfficeTimes());
+            to.setOfficeTimes(from.getOfficeTimes()); // 이미 DTO->Entity로 변환이 완료된 값이 들어오기 때문에 가능함.
         }
     }
 
@@ -223,7 +181,7 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
             LocalTime mondayCLOSED = LocalTime.parse(hospitalDTO.getDutyTime1c(), formatter);
             mon = new HospitalOfficeTime("monday", mondayOPEN, mondayCLOSED, hospital);
         }
-        hospitalOfficeTimeRepository.save(mon);
+        //hospitalOfficeTimeRepository.save(mon);
         hospital.addTime(mon);
 
         HospitalOfficeTime tue = new HospitalOfficeTime("tuesday", null, null, hospital);
@@ -232,7 +190,7 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
             LocalTime tuesdayCLOSED = LocalTime.parse(hospitalDTO.getDutyTime2c(), formatter);
             tue = new HospitalOfficeTime("tuesday", tuesdayOPEN, tuesdayCLOSED, hospital);
         }
-        hospitalOfficeTimeRepository.save(tue);
+        //hospitalOfficeTimeRepository.save(tue);
         hospital.addTime(tue);
 
         HospitalOfficeTime wed = new HospitalOfficeTime("wednesday", null, null, hospital);
@@ -241,7 +199,7 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
             LocalTime wednesdayCLOSED = LocalTime.parse(hospitalDTO.getDutyTime3c(), formatter);
             wed = new HospitalOfficeTime("wednesday", wednesdayOPEN, wednesdayCLOSED, hospital);
         }
-        hospitalOfficeTimeRepository.save(wed);
+        //hospitalOfficeTimeRepository.save(wed);
         hospital.addTime(wed);
 
         HospitalOfficeTime thu = new HospitalOfficeTime("thursday", null, null, hospital);
@@ -250,7 +208,7 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
             LocalTime thursdayCLOSED = LocalTime.parse(hospitalDTO.getDutyTime4c(), formatter);
             thu = new HospitalOfficeTime("thursday", thursdayOPEN, thursdayCLOSED, hospital);
         }
-        hospitalOfficeTimeRepository.save(thu);
+        //hospitalOfficeTimeRepository.save(thu);
         hospital.addTime(thu);
 
         HospitalOfficeTime fri = new HospitalOfficeTime("thursday", null, null, hospital);
@@ -259,7 +217,7 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
             LocalTime fridayCLOSED = LocalTime.parse(hospitalDTO.getDutyTime5c(), formatter);
             fri = new HospitalOfficeTime("friday", fridayOPEN, fridayCLOSED, hospital);
         }
-        hospitalOfficeTimeRepository.save(fri);
+        //hospitalOfficeTimeRepository.save(fri);
         hospital.addTime(fri);
 
         HospitalOfficeTime satSun = new HospitalOfficeTime("satsun", null, null, hospital);
@@ -268,7 +226,7 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
             LocalTime satSunClosed = LocalTime.parse(hospitalDTO.getDutyTime7c(), formatter);
             satSun = new HospitalOfficeTime("satsun", satSunOpen, satSunClosed, hospital);
         }
-        hospitalOfficeTimeRepository.save(satSun);
+        //hospitalOfficeTimeRepository.save(satSun);
         hospital.addTime(satSun);
 
         HospitalOfficeTime holiday = new HospitalOfficeTime("holiday", null, null, hospital);
@@ -277,7 +235,7 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
             LocalTime holidayClosed = LocalTime.parse(hospitalDTO.getDutyTime8c(), formatter);
             holiday = new HospitalOfficeTime("holiday", holidayOpen, holidayClosed, hospital);
         }
-        hospitalOfficeTimeRepository.save(holiday);
+        //hospitalOfficeTimeRepository.save(holiday);
         hospital.addTime(holiday);
 
     }
@@ -318,12 +276,53 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
             urlBuilder.append("&").append(URLEncoder.encode("pageNo", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(searchCondition.getPageNo()), "UTF-8"));
         }
 
-        if(searchCondition.getSearchAll()) {
+        if(searchCondition.getSearchAll() != null) {
             urlBuilder.append("&").append(URLEncoder.encode("numOfRows", "UTF-8")).append("=").append(Integer.toString(24467));
         }
 
 
         return urlBuilder;
+    }
+
+    private static JSONArray jsonObjectArrayDeterminator(Object itemObj) {
+        JSONArray hospitals;
+        if (itemObj instanceof JSONArray) {
+            hospitals = (JSONArray) itemObj;
+        } else if (itemObj instanceof JSONObject) {
+            hospitals = new JSONArray();
+            hospitals.put((JSONObject) itemObj);
+        } else {
+            throw new JSONException("item key is neither a JSONObject nor a JSONArray");
+        }
+        return hospitals;
+    }
+
+    private JSONObject getJsonObject(SearchCondition searchCondition) throws IOException {
+        StringBuilder urlBuilder = getUrlBySearchCondition(searchCondition);
+        URL url = new URL(urlBuilder.toString());
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+        conn.setRequestProperty("Content-type", "application/json");
+
+        log.trace("Response code: {}" , conn.getResponseCode());
+        log.trace("url = {}", url);
+
+        BufferedReader rd;
+        if (conn.getResponseCode() >= 200 && conn.getResponseCode() <= 300) {
+            rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        } else {
+            rd = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+        }
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = rd.readLine()) != null) {
+            sb.append(line);
+        }
+        rd.close();
+        conn.disconnect();
+
+        JSONObject xmlJSONObj = XML.toJSONObject(sb.toString());
+        return xmlJSONObj;
     }
 
     //    @Override

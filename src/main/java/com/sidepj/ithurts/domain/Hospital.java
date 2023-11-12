@@ -40,6 +40,7 @@ public class Hospital {
 
     @Column(name = "hospital_updated_date")
     private LocalDateTime updatedDate;
+
     @Column(name = "hospital_created_date")
     private LocalDateTime createdDate;
 

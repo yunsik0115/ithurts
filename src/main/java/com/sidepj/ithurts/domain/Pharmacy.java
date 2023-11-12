@@ -40,7 +40,7 @@ public class Pharmacy {
     private LocalDateTime createdDate;
 
     @OneToMany(mappedBy = "pharmacy")
-    private List<PharmacyOfficeTime> pharmacyOfficeTime = new ArrayList<>();
+    private List<PharmacyOfficeTime> officeTimes = new ArrayList<>();
 
     // private boolean is_available; 서비스 단에서 처리
 
@@ -48,7 +48,7 @@ public class Pharmacy {
     private List<Report> reports = new ArrayList<>();
 
     public void addTime(PharmacyOfficeTime pharmacyOfficeTime){
-        this.pharmacyOfficeTime.add(pharmacyOfficeTime);
+        this.officeTimes.add(pharmacyOfficeTime);
         pharmacyOfficeTime.setPharmacy(this);
 
     }
