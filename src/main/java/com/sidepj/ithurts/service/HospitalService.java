@@ -117,10 +117,12 @@ public class HospitalService implements DataService<HospitalControllerDTO> {
         }
 
         if(entity.getCreatedDate() != null){
-            dto.setCreatedDate(LocalDateTime.now());
+            dto.setCreatedDate(entity.getCreatedDate());
         }
 
-        dto.setUpdatedDate(LocalDateTime.now());
+        if(entity.getUpdatedDate() != null){
+            dto.setUpdatedDate(entity.getUpdatedDate());
+        }
 
         return dto;
     }

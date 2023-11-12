@@ -30,6 +30,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -103,6 +104,7 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
         for (Hospital hospital : hospitalList) {
             if(hospitalRepository.findHospitalByNameAndAddressAndHospitalType(hospital.getName(), hospital.getAddress(), hospital.getHospitalType()) == null){
                 all.add(hospitalRepository.save(hospital));
+                hospital.setCreatedDate(LocalDateTime.now());
                 hospitalOfficeTimeRepository.saveAll(hospital.getOfficeTimes());
             }
             else{
@@ -146,6 +148,7 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
         if(hospitalDTO.getWgs84Lat() != null && hospitalDTO.getWgs84Lon() != null) {
             hospital.setCoordinates(new Point(hospitalDTO.getWgs84Lat(), hospitalDTO.getWgs84Lon()));
         }
+        hospital.setCreatedDate(LocalDateTime.now());
     }
 
     private static void entityUpdateWithEntity(Hospital from, Hospital to){
@@ -167,6 +170,8 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
         if(!from.getOfficeTimes().equals(to.getOfficeTimes())) {
             to.setOfficeTimes(from.getOfficeTimes()); // 이미 DTO->Entity로 변환이 완료된 값이 들어오기 때문에 가능함.
         }
+
+        to.setUpdatedDate(LocalDateTime.now());
     }
 
     // 이 메서드는 officeTime을 hospitalDTO로부터 별도의 HospitalOfficeTimeTable에 주입하기 위한 역할을 담당함.
