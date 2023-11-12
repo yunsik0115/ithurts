@@ -25,5 +25,9 @@ public interface DataService<T> {
 
     public List<T> searchBySearchCondition(SearchCondition searchCondition);
 
+    public List<T> getAll();
+
+    public List<T> retrieveAll();
+
 
 }

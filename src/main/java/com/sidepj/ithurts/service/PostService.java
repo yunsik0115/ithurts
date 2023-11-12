@@ -3,27 +3,29 @@ package com.sidepj.ithurts.service;
 import com.sidepj.ithurts.domain.Comment;
 import com.sidepj.ithurts.domain.Love;
 import com.sidepj.ithurts.domain.Post;
+import com.sidepj.ithurts.service.dto.PostDTO;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PostService {
 
-    Post savePost(Post post);
+    PostDTO savePost(Post post);
 
-    Post getPost(Long id);
+    PostDTO getPost(Long id);
 
     void removePost(Post post);
 
-    List<Post> getAllPosts();
+    List<PostDTO> getAllPosts();
 
-    List<Post> getPostByName(String name);
+    List<PostDTO> getPostByName(String name);
 
-    List<Post> getPostByMember(String memberName);
+    List<PostDTO> getPostByMember(String memberName);
 
-    List<Post> getPostByContent(String content);
+    List<PostDTO> getPostByContent(String content);
 
-    List<Post> getPostByPostType(String postType);
+    List<PostDTO> getPostByPostType(String postType);
 
 
 

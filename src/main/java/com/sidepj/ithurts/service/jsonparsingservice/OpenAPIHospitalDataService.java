@@ -67,14 +67,7 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
         Object itemObj = xmlJSONObj.getJSONObject("response").getJSONObject("body").getJSONObject("items").get("item");
 
         // JSON 객체와 배열 모두 처리
-        if (itemObj instanceof JSONArray) {
-            hospitals = (JSONArray) itemObj;
-        } else if (itemObj instanceof JSONObject) {
-            hospitals = new JSONArray();
-            hospitals.put((JSONObject) itemObj);
-        } else {
-            throw new JSONException("item key is neither a JSONObject nor a JSONArray");
-        }
+        hospitals = jsonObjectArrayDeterminator(itemObj);
 
         JsonMapper jsonMapper = JsonMapper.builder().build();
         List<HospitalDTO> hospitalDTOList = new ArrayList<>();
@@ -99,31 +92,18 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
         return dtosToHospital(hospitalDTOList);
     }
 
-//    @Override
-//    public Hospital retrieveOne(SearchCondition searchCondition){
-//        log.trace("====== Start Retrieving Hospital Datas From OPENAPI ======");
-//
-//        JSONObject xmlJSONObj = null;
-//        try {
-//            xmlJSONObj = getJsonObject(searchCondition);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//        log.trace("xmljsonobj = {}", xmlJSONObj);
-//        try {
-//            JSONObject hospital = xmlJSONObj.getJSONObject("response").getJSONObject("body").getJSONObject("items").getJSONObject("item");
-//            JsonMapper jsonMapper = JsonMapper.builder().build();
-//            String hospitalJSONString = hospital.toString();
-//            HospitalDTO hospitalDTO = objectMapper.readValue(hospitalJSONString, HospitalDTO.class);
-//            return dtoToHospital(hospitalDTO);
-//        } catch (JSONException e){
-//            throw new IllegalArgumentException("검색 결과가 없습니다");
-//        } catch (JsonMappingException e) {
-//            throw new RuntimeException(e);
-//        } catch (JsonProcessingException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
+    private static JSONArray jsonObjectArrayDeterminator(Object itemObj) {
+        JSONArray hospitals;
+        if (itemObj instanceof JSONArray) {
+            hospitals = (JSONArray) itemObj;
+        } else if (itemObj instanceof JSONObject) {
+            hospitals = new JSONArray();
+            hospitals.put((JSONObject) itemObj);
+        } else {
+            throw new JSONException("item key is neither a JSONObject nor a JSONArray");
+        }
+        return hospitals;
+    }
 
     private JSONObject getJsonObject(SearchCondition searchCondition) throws IOException {
         StringBuilder urlBuilder = getUrlBySearchCondition(searchCondition);
@@ -150,8 +130,6 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
         conn.disconnect();
 
         JSONObject xmlJSONObj = XML.toJSONObject(sb.toString());
-        log.trace("==========JSON STRING FROM OPENAPI============");
-        log.trace("{}", xmlJSONObj.toString());
         return xmlJSONObj;
     }
 
@@ -189,9 +167,10 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
             urlBuilder.append("&").append(URLEncoder.encode("pageNo", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(searchCondition.getPageNo()), "UTF-8"));
         }
 
-        if(searchCondition.getNumOfRows() != null){ // 받아올 건수
-            urlBuilder.append("&").append(URLEncoder.encode("numOfRows", "UTF-8")).append("=").append(URLEncoder.encode(String.valueOf(searchCondition.getNumOfRows()), "UTF-8"));
+        if(searchCondition.getSearchAll()) {
+            urlBuilder.append("&").append(URLEncoder.encode("numOfRows", "UTF-8")).append("=").append(Integer.toString(24467));
         }
+
 
         return urlBuilder;
     }
@@ -201,22 +180,31 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
 
         List<Hospital> hospitalTransferedhospitalList = new ArrayList<>();
         for (HospitalDTO hospitalDTO : hospitalDTOS) {
-
-            Hospital hospital = new Hospital(); // 객체 생성은 반복할때마다 생성하지 않으면 Dirty Checking에 의해 기존 Row가 update 됨.
-            hospital.setId(null);
-            hospital.setName(hospitalDTO.getDutyName());
-            hospital.setContact(hospitalDTO.getDutyTel1());
-            hospital.setAddress(hospitalDTO.getDutyAddr());
-            if(hospitalDTO.getWgs84Lat() != null && hospitalDTO.getWgs84Lon() != null) {
-                hospital.setCoordinates(new Point(hospitalDTO.getWgs84Lat(), hospitalDTO.getWgs84Lon()));
+            Hospital savedOne = null;
+            // == TO DO 건당 쿼리가 1개씩 나감, 쿼리 20000개 나갈텐데 어떻게 해결? ==//
+            if(hospitalRepository.findHospitalByNameAndAddress(hospitalDTO.getDutyName(), hospitalDTO.getDutyAddr()) == null) {
+                Hospital hospital = new Hospital(); // 객체 생성은 반복할때마다 생성하지 않으면 Dirty Checking에 의해 기존 Row가 update 됨
+                entityInjectionFromDTO(hospitalDTO, hospital);
+                savedOne = hospitalRepository.save(hospital);
+            } else {
+                savedOne = hospitalRepository.findHospitalByNameAndAddress(hospitalDTO.getDutyName(), hospitalDTO.getDutyAddr()); // Update Column By Dirty Checking
+                entityInjectionFromDTO(hospitalDTO, savedOne);
             }
-            Hospital savedOne = hospitalRepository.save(hospital);
             officeTimeInjectionFromDTOs(hospitalDTO, savedOne);
-            log.trace("transfered.pharm = {}", savedOne);
             hospitalTransferedhospitalList.add(savedOne);
         }
 
         return hospitalTransferedhospitalList;
+    }
+
+    private static void entityInjectionFromDTO(HospitalDTO hospitalDTO, Hospital hospital) {
+        hospital.setName(hospitalDTO.getDutyName());
+        hospital.setContact(hospitalDTO.getDutyTel1());
+        hospital.setAddress(hospitalDTO.getDutyAddr());
+        hospital.setHospitalType(hospitalDTO.getDutyDivNam());
+        if(hospitalDTO.getWgs84Lat() != null && hospitalDTO.getWgs84Lon() != null) {
+            hospital.setCoordinates(new Point(hospitalDTO.getWgs84Lat(), hospitalDTO.getWgs84Lon()));
+        }
     }
 
     private void officeTimeInjectionFromDTOs(HospitalDTO hospitalDTO, Hospital hospital){
@@ -288,5 +276,32 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
         hospital.addTime(holiday);
 
     }
+
+    //    @Override
+//    public Hospital retrieveOne(SearchCondition searchCondition){
+//        log.trace("====== Start Retrieving Hospital Datas From OPENAPI ======");
+//
+//        JSONObject xmlJSONObj = null;
+//        try {
+//            xmlJSONObj = getJsonObject(searchCondition);
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//        log.trace("xmljsonobj = {}", xmlJSONObj);
+//        try {
+//            JSONObject hospital = xmlJSONObj.getJSONObject("response").getJSONObject("body").getJSONObject("items").getJSONObject("item");
+//            JsonMapper jsonMapper = JsonMapper.builder().build();
+//            String hospitalJSONString = hospital.toString();
+//            HospitalDTO hospitalDTO = objectMapper.readValue(hospitalJSONString, HospitalDTO.class);
+//            return dtoToHospital(hospitalDTO);
+//        } catch (JSONException e){
+//            throw new IllegalArgumentException("검색 결과가 없습니다");
+//        } catch (JsonMappingException e) {
+//            throw new RuntimeException(e);
+//        } catch (JsonProcessingException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
+
 
 }

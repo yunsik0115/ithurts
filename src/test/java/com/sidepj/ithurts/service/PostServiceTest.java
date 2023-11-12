@@ -3,6 +3,7 @@ package com.sidepj.ithurts.service;
 import com.sidepj.ithurts.domain.Member;
 import com.sidepj.ithurts.domain.Post;
 import com.sidepj.ithurts.service.dto.MemberDTO;
+import com.sidepj.ithurts.service.dto.PostDTO;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -50,13 +52,13 @@ class PostServiceTest {
         MemberDTO author = new MemberDTO("mason", "xxxx", "User");
         Member join = memberService.join(author, author.getRole());
         Post testPost1 = new Post("test post 1", "test content 1", join);
-        Post savedPost = postService.savePost(testPost1);
+        PostDTO savedPost = postService.savePost(testPost1);
         Long savedPostId = savedPost.getId();
 
         em.flush();
         em.clear();
 
-        Post searchedPost = postService.getPost(savedPostId);
+        PostDTO searchedPost = postService.getPost(savedPostId);
         Assertions.assertThat(searchedPost.getId()).isEqualTo(savedPost.getId());
     }
 
@@ -65,13 +67,13 @@ class PostServiceTest {
         MemberDTO author = new MemberDTO("mason", "xxxx", "User");
         Member join = memberService.join(author, author.getRole());
         Post testPost1 = new Post("test post 1", "test content 1", join);
-        Post savedPost = postService.savePost(testPost1);
+        PostDTO savedPost = postService.savePost(testPost1);
 
         em.flush();
         em.clear();
-        List<Post> allPosts = postService.getAllPosts();
+        List<PostDTO> allPosts = postService.getAllPosts();
         Assertions.assertThat(allPosts).hasSize(1);
-        postService.removePost(savedPost);
+        postService.removePost(testPost1);
         allPosts = postService.getAllPosts();
         Assertions.assertThat(allPosts).hasSize(0);
     }
@@ -92,7 +94,7 @@ class PostServiceTest {
         em.flush();
         em.clear();
 
-        List<Post> allPosts = postService.getAllPosts();
+        List<PostDTO> allPosts = postService.getAllPosts();
         Assertions.assertThat(allPosts).hasSize(4);
     }
 
@@ -114,9 +116,9 @@ class PostServiceTest {
         em.flush();
         em.clear();
 
-        List<Post> postByName = postService.getPostByName("test post 1");
+        List<PostDTO> postByName = postService.getPostByName("test post 1");
         Assertions.assertThat(postByName).hasSize(2);
-        List<Post> postByName1 = postService.getPostByName("test post");
+        List<PostDTO> postByName1 = postService.getPostByName("test post");
         Assertions.assertThat(postByName1).hasSize(5);
     }
 
@@ -140,8 +142,8 @@ class PostServiceTest {
         em.flush();
         em.clear();
 
-        List<Post> mason = postService.getPostByMember("mason");
-        List<Post> yunsik = postService.getPostByMember("yunsik");
+        List<PostDTO> mason = postService.getPostByMember("mason");
+        List<PostDTO> yunsik = postService.getPostByMember("yunsik");
         Assertions.assertThat(yunsik).hasSize(2);
         Assertions.assertThat(mason).hasSize(3);
     }
@@ -166,9 +168,9 @@ class PostServiceTest {
         em.flush();
         em.clear();
 
-        List<Post> testContent = postService.getPostByContent("test content");
+        List<PostDTO> testContent = postService.getPostByContent("test content");
         Assertions.assertThat(testContent).hasSize(5);
-        List<Post> postByContent = postService.getPostByContent("test content 2");
+        List<PostDTO> postByContent = postService.getPostByContent("test content 2");
         Assertions.assertThat(postByContent).hasSize(2);
     }
 

@@ -39,4 +39,5 @@ public class PharmacyDTO {
 
     private Double wgs84Lon; // 경도
     private Double wgs84Lat;
+
 }

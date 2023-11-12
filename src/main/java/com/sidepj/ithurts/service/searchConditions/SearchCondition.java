@@ -22,4 +22,6 @@ public class SearchCondition {
 
     private Integer numOfRows; // 받아올 건수
 
+    private Boolean searchAll;
+
 }

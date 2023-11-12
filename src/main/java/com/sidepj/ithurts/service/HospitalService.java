@@ -2,71 +2,126 @@ package com.sidepj.ithurts.service;
 
 import com.sidepj.ithurts.domain.Hospital;
 import com.sidepj.ithurts.repository.HospitalRepository;
+import com.sidepj.ithurts.service.dto.HospitalControllerDTO;
 import com.sidepj.ithurts.service.jsonparsingservice.OpenAPIDataService;
 import com.sidepj.ithurts.service.searchConditions.SearchCondition;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.sql.Array;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class HospitalService implements DataService<Hospital> {
+public class HospitalService implements DataService<HospitalControllerDTO> {
 
     private final HospitalRepository hospitalRepository;
     private final OpenAPIDataService<Hospital> openAPIHospitalDataService;
 
+
+
     @Override
-    public List<Hospital> searchByName(String officeName) {
+    public List<HospitalControllerDTO> searchByName(String officeName) {
         List<Hospital> retrievedFromDB = hospitalRepository.findByName(officeName);
         if(retrievedFromDB.isEmpty()){
             SearchCondition sc = SearchCondition.builder().officeName(officeName).build();
             // DB에 Persist는 이미 완료된 상태
-            return openAPIHospitalDataService.retrieve(sc);
+            return transferToDTO(openAPIHospitalDataService.retrieve(sc));
         }
-        return retrievedFromDB;
+        return transferToDTO(retrievedFromDB);
     }
 
     @Override
-    public List<Hospital> searchByCity(String cityName) {
+    public List<HospitalControllerDTO> searchByCity(String cityName) {
         List<Hospital> retrievedFromDB = hospitalRepository.findByAddressContains(cityName, "");
         if(retrievedFromDB.isEmpty()){
             SearchCondition sc = SearchCondition.builder().city(cityName).build();
-            List<Hospital> retrieve = openAPIHospitalDataService.retrieve(sc);
+            return transferToDTO(openAPIHospitalDataService.retrieve(sc));
             // DB에 Persist는 이미 완료된 상태
-            return retrieve;
         }
-        return retrievedFromDB;
+        return transferToDTO(retrievedFromDB);
     }
 
     @Override
-    public List<Hospital> searchByDetailedCity(String cityName, String detailedCity) {
+    public List<HospitalControllerDTO> searchByDetailedCity(String cityName, String detailedCity) {
         List<Hospital> retrievedFromDB = hospitalRepository.findByAddressContains(cityName, detailedCity);
         if(retrievedFromDB.isEmpty()){
             SearchCondition sc = SearchCondition.builder().city(cityName).detailedCity(detailedCity).build();
-            List<Hospital> retrieve = openAPIHospitalDataService.retrieve(sc);
-            // DB에 Persist는 이미 완료된 상태
-            return retrieve;
+            return transferToDTO(openAPIHospitalDataService.retrieve(sc));
+
         }
-        return retrievedFromDB;
+        return transferToDTO(retrievedFromDB);
     }
 
     @Override
-    public List<Hospital> searchByServiceType(String serviceType) {
+    public List<HospitalControllerDTO> searchByServiceType(String serviceType) {
         List<Hospital> retrievedFromDB = hospitalRepository.findByHospitalType(serviceType);
         if(retrievedFromDB.isEmpty()){
             SearchCondition sc = SearchCondition.builder().servicePart(serviceType).build();
-            List<Hospital> retrieve = openAPIHospitalDataService.retrieve(sc);
+            return transferToDTO(openAPIHospitalDataService.retrieve(sc));
             // DB에 Persist는 이미 완료된 상태
-            return retrieve;
+
         }
-        return retrievedFromDB;
+        return transferToDTO(retrievedFromDB);
     }
 
     @Override
-    public List<Hospital> searchBySearchCondition(SearchCondition searchCondition) {
+    public List<HospitalControllerDTO> searchBySearchCondition(SearchCondition searchCondition) {
         return null;
+    }
+
+    @Override
+    public List<HospitalControllerDTO> getAll() {
+        return transferToDTO(hospitalRepository.findAll());
+    }
+
+    @Override
+    public List<HospitalControllerDTO> retrieveAll() {
+        SearchCondition searchCondition = SearchCondition.builder().searchAll(true).build();
+        return transferToDTO(openAPIHospitalDataService.retrieve(searchCondition));
+    }
+
+    public List<HospitalControllerDTO> transferToDTO(List<Hospital> hospitalList){
+        List<HospitalControllerDTO> list = new ArrayList<>();
+        for (Hospital hospital : hospitalList) {
+            list.add(entityDtoTransferValidation(hospital));
+        }
+        return list;
+    }
+
+    public HospitalControllerDTO entityDtoTransferValidation(Hospital entity){
+        HospitalControllerDTO dto = new HospitalControllerDTO();
+        if(entity.getId() != null){
+            dto.setId(entity.getId());
+        }
+
+        if(entity.getName() != null){
+            dto.setName(entity.getName());
+        }
+
+        if(entity.getContact() != null){
+            dto.setContact(entity.getContact());
+        }
+
+        if(entity.getAddress() != null){
+            dto.setAddress(entity.getAddress());
+        }
+
+        if(entity.getCoordinates() != null){
+            dto.setX_cord(entity.getCoordinates().getX());
+            dto.setY_cord(entity.getCoordinates().getY());
+        }
+
+        if(entity.getCreatedDate() != null){
+            dto.setCreatedDate(LocalDateTime.now());
+        }
+
+        dto.setUpdatedDate(LocalDateTime.now());
+
+        return dto;
     }
 }

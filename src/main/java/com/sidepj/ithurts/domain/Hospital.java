@@ -39,9 +39,9 @@ public class Hospital {
     private Point coordinates;
 
     @Column(name = "hospital_updated_date")
-    private LocalDateTime updatedOn;
+    private LocalDateTime updatedDate;
     @Column(name = "hospital_created_date")
-    private LocalDateTime createdOn;
+    private LocalDateTime createdDate;
 
 
     // private boolean is_available; 서비스단에서 처리

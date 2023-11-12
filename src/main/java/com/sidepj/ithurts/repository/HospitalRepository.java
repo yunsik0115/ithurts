@@ -16,5 +16,9 @@ public interface HospitalRepository extends JpaRepository<Hospital, Long> {
 
     public List<Hospital> findByHospitalType(String hospitalType);
 
+    public List<Hospital> findAll();
+
+    public Hospital findHospitalByNameAndAddress(String name, String address);
+
 
 }

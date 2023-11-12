@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
@@ -19,17 +20,17 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     // Post 이름을 기준으로 Post 검색
     @Query("select p from Post p where p.postName LIKE %:postName%")
-    List<Post> findPostsByPostName(@Param("postName") String postName);
+    Optional<List<Post>> findPostsByPostName(@Param("postName") String postName);
 
     // Member의 이름을 기준으로 Post 검색
     @Query("select p from Post p join p.postMember where p.postMember.name = :name")
-    List<Post> findPostsByMemberName(@Param("name") String name);
+    Optional<List<Post>> findPostsByMemberName(@Param("name") String name);
 
     // searchContent의 내용이 content의 일부인 글들을 검색함.
     @Query("select p from Post p where p.content LIKE %:searchContent%")
-    List<Post> findPostsByContent(@Param("searchContent") String searchContent);
+    Optional<List<Post>> findPostsByContent(@Param("searchContent") String searchContent);
 
-    List<Post> findPostsByPostType(String postType);
+    Optional<List<Post>> findPostsByPostType(String postType);
 
 
     void deletePostById(Long id);
