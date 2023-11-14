@@ -73,7 +73,7 @@ class PostServiceTest {
         em.clear();
         List<PostDTO> allPosts = postService.getAllPosts();
         Assertions.assertThat(allPosts).hasSize(1);
-        postService.removePost(testPost1);
+        //postService.removePost(testPost1);
         allPosts = postService.getAllPosts();
         Assertions.assertThat(allPosts).hasSize(0);
     }

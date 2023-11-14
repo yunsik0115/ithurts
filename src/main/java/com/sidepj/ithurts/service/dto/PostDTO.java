@@ -24,10 +24,6 @@ public class PostDTO {
 
     private String postType;
 
-    private List<CommentDTO> comments;
-
-    private List<LoveDTO> loves;
-
     public PostDTO(Post post){
         this.id = post.getId();
         this.name = post.getPostName();
@@ -35,4 +31,5 @@ public class PostDTO {
         this.createdDate = post.getCreatedDate();
         this.memberDTO = new MemberDTO(post.getPostMember());
     }
+
 }

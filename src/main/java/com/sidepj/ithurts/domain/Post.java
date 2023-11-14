@@ -1,5 +1,6 @@
 package com.sidepj.ithurts.domain;
 
+import com.sidepj.ithurts.service.dto.PostDTO;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -53,4 +54,5 @@ public class Post {
         this.postName = postName;
         this.content = content;
     }
+
 }

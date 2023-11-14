@@ -15,7 +15,7 @@ public interface PostService {
 
     PostDTO getPost(Long id);
 
-    void removePost(Post post);
+    void removePost(Long id);
 
     List<PostDTO> getAllPosts();
 

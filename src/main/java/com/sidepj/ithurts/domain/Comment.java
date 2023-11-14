@@ -21,7 +21,7 @@ public class Comment {
 
     @ManyToOne
     @JoinColumn(name = "member_id")
-    private Member comment_member;
+    private Member author;
 
     @JoinColumn(name = "comment_content")
     private String content;
