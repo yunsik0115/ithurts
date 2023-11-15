@@ -4,6 +4,7 @@ import com.sidepj.ithurts.domain.Comment;
 import com.sidepj.ithurts.domain.Love;
 import com.sidepj.ithurts.repository.LoveRepository;
 import com.sidepj.ithurts.service.CommentService;
+import com.sidepj.ithurts.service.LoveService;
 import com.sidepj.ithurts.service.PostService;
 import com.sidepj.ithurts.service.dto.PostDTO;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ public class PostController {
 
     private final PostService postService;
     private final CommentService commentService;
-    private final LoveRepository loveRepository;
+    private final LoveService loveService;
 
     @GetMapping("/posts")
     public String dashboard(Model model) {
@@ -84,7 +85,7 @@ public class PostController {
 
     @GetMapping("/post/{postId}/like")
     public String getLikesOnThisPost(@PathVariable Long postId, Model model){
-        List<Love> likes = loveRepository.findByPostId(postId);
+        List<Love> likes = loveService.getLoves(postId);
         int count = likes.size();
         model.addAttribute("likes", likes);
         model.addAttribute("count", count);
@@ -92,14 +93,18 @@ public class PostController {
     }
 
     @PostMapping("/post/{postId}/like")
-    public String addLikeOnThisPost(){
+    public String addLikeOnThisPost(@PathVariable Long postId){
+        Love love = new Love();
+        loveService.addLove(postId, love);
+        // Member Data Injection (maybe by using cookie? or Session?)
+        // HOW to add entity if we get DTO as (POST) findbyPostID?
         return "post.html";
     }
 
     @DeleteMapping("/post/{postId}/like/{likeId}")
     public String removeLikeOnThisPost(@PathVariable Long postId,
                                        @PathVariable(name = "likeId") Long loveId){
-        loveRepository.removeLoveById(loveId);
+        loveService.removeLove(postId, loveId);
         return "post.html";
     }
 
@@ -107,12 +112,14 @@ public class PostController {
 //        무필요, post 불러올때 같이 가져옴
 //    }
     @PostMapping("/post/{postId}/comment")
-    public String addCommentOnThisPost(){
+    public String addCommentOnThisPost(@PathVariable Long postId, @ModelAttribute Comment comment, Model model){
+        commentService.saveComment(comment);
         return "post.html";
     }
 
     @DeleteMapping("/post/{postId}/comment/{commentId}")
-    public String deleteCommentOnThisPost(){
+    public String deleteCommentOnThisPost(@PathVariable Long postId, @PathVariable Long commentId){
+        commentService.deleteComment(commentId);
         return "post.html";
     }
 

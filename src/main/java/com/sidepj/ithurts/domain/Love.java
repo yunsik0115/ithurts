@@ -1,13 +1,14 @@
 package com.sidepj.ithurts.domain;
 
 import lombok.AccessLevel;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "loves")
+@NoArgsConstructor
+@Table(name = "loves") @Data
 public class Love {
     @Id
     @Column(name = "love_id")
@@ -24,4 +25,5 @@ public class Love {
     @ManyToOne
     @JoinColumn(name = "comment_id")
     private Comment comment;
+
 }
