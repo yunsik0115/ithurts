@@ -115,6 +115,7 @@ public class PostController {
 //    @GetMapping("/post/{postId}/comment"){
 //        무필요, post 불러올때 같이 가져옴
 //    }
+
     @PostMapping("/post/{postId}/comment")
     public String addCommentOnThisPost(@PathVariable Long postId, @ModelAttribute CommentDTO comment, Model model){
         //commentService.saveComment(comment);

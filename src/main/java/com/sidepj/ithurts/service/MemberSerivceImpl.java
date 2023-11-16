@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +27,43 @@ public class MemberSerivceImpl implements MemberService {
     }
 
     @Override
-    public MemberControllerDTO getMember(String memberName) {
+    public MemberControllerDTO getMemberByName(String memberName) {
         return new MemberControllerDTO(memberRepository.findMemberByName(memberName));
+    }
+
+    @Override
+    public MemberControllerDTO getMemberById(Long id) {
+        if(memberRepository.findById(id).isPresent()){
+            Optional<Member> fiindMember = memberRepository.findById(id);
+            return new MemberControllerDTO(fiindMember.get());
+        }
+        else throw new IllegalArgumentException("존재하지 않는 회원입니다.");
+    }
+
+    @Override
+    public MemberControllerDTO updateMemberById(Long id, MemberControllerDTO memberControllerDTO) {
+        Optional<Member> findMember = memberRepository.findById(id);
+        if(findMember.isPresent()){
+            Member member = findMember.get();
+            member.setName(memberControllerDTO.getUsername());
+            return new MemberControllerDTO(member);
+        }
+        else{
+            throw new IllegalArgumentException("정보를 업데이트 할 수 없습니다 관리자에게 문의하세요");
+        }
+    }
+
+    @Override
+    public void deleteAccount(Long id) {
+        Optional<Member> findMember = memberRepository.findById(id);
+        if(findMember.isPresent()){
+            Member member = findMember.get();
+            try {
+                memberRepository.delete(member);
+            } catch (Exception e){
+                throw new IllegalArgumentException("해당 계정을 삭제할 수 없습니다 관리자에게 문의하세요.");
+            }
+        }
     }
 
     @Override
