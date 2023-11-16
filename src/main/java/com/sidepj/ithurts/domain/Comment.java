@@ -1,5 +1,6 @@
 package com.sidepj.ithurts.domain;
 
+import com.sidepj.ithurts.service.dto.PostDTO;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -28,4 +29,5 @@ public class Comment {
 
     @OneToMany(mappedBy = "comment")
     private List<Love> loves =new ArrayList<>();
+
 }

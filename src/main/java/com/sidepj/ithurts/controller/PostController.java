@@ -6,6 +6,7 @@ import com.sidepj.ithurts.repository.LoveRepository;
 import com.sidepj.ithurts.service.CommentService;
 import com.sidepj.ithurts.service.LoveService;
 import com.sidepj.ithurts.service.PostService;
+import com.sidepj.ithurts.service.dto.CommentDTO;
 import com.sidepj.ithurts.service.dto.PostDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -16,6 +17,7 @@ import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
+@RequestMapping("/dashboard")
 public class PostController {
 
     private final PostService postService;
@@ -35,7 +37,8 @@ public class PostController {
         model.addAttribute("posts", posts);
         return "posts.html";
     }
-//    TO-DO  Ambiguous Controller Mapping (how am I going to separate logic when it comes to content not name?
+
+    //    TO-DO  Ambiguous Controller Mapping (how am I going to separate logic when it comes to content not name?
 //    @GetMapping("/posts/search")
 //    public String searchPostByContent(@RequestParam(required = false) String content, Model model) {
 //
@@ -44,12 +47,13 @@ public class PostController {
 //        return "posts.html";
 //    }
 
-    @GetMapping("/posts/search")
-    public String searchPostByAuthor(@RequestParam(required = false) String author, Model model) {
-        List<PostDTO> posts = postService.getPostByMember(author);
-        model.addAttribute("posts", posts);
-        return "posts.html";
-    }
+//    @GetMapping("/posts/search")
+//    public String searchPostByAuthor(@RequestParam(required = false) String author, Model model) {
+//        List<PostDTO> posts = postService.getPostByMember(author);
+//        model.addAttribute("posts", posts);
+//        return "posts.html";
+//    }
+
 
     @GetMapping("/post")
     public String postForm() {
@@ -112,14 +116,14 @@ public class PostController {
 //        무필요, post 불러올때 같이 가져옴
 //    }
     @PostMapping("/post/{postId}/comment")
-    public String addCommentOnThisPost(@PathVariable Long postId, @ModelAttribute Comment comment, Model model){
-        commentService.saveComment(comment);
+    public String addCommentOnThisPost(@PathVariable Long postId, @ModelAttribute CommentDTO comment, Model model){
+        //commentService.saveComment(comment);
         return "post.html";
     }
 
     @DeleteMapping("/post/{postId}/comment/{commentId}")
     public String deleteCommentOnThisPost(@PathVariable Long postId, @PathVariable Long commentId){
-        commentService.deleteComment(commentId);
+        //commentService.deleteComment(commentId);
         return "post.html";
     }
 
