@@ -44,9 +44,14 @@ public class PostServiceImpl implements PostService{
 
     @Override
     public List<PostDTO> getAllPosts() {
-        List<Post> all = postRepository.findAll();
+        List<Post> posts = postRepository.findAll();
         List<PostDTO> allDTO = new ArrayList<>();
-        all.stream().forEach(m -> allDTO.add(new PostDTO(m)));
+        for (Post post : posts) {
+            PostDTO postDTO = new PostDTO(post);
+            //postDTO.setCommentCount(post.getComments().size()); if postDTO Constructor injection fail then initalize the field into 0
+            //postDTO.setLoveCount(post.getLoves().size()); retrieve counts data later.
+            allDTO.add(postDTO);
+        }
         return allDTO;
     }
 

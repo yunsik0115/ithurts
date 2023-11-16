@@ -6,7 +6,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class MemberDTO {
+public class MemberJoinDTO {
 
     private Long id;
 
@@ -18,15 +18,15 @@ public class MemberDTO {
 
     private LocalDateTime lastPwdChanged;
 
-    public MemberDTO(Member member) {
+    public MemberJoinDTO(Member member) {
         this.id = member.getId();
         this.username = member.getName();
-        this.password = member.getPassword();
+        //this.password = member.getPassword();
         this.role = member.getRole();
         this.lastPwdChanged = member.getLastPwdChanged();
     }
 
-    public MemberDTO(String username, String password, String role) {
+    public MemberJoinDTO(String username, String password, String role) {
         this.username = username;
         this.password = password;
         this.role = role;

@@ -1,12 +1,10 @@
 package com.sidepj.ithurts.service;
 
 import com.sidepj.ithurts.domain.Member;
-import com.sidepj.ithurts.service.dto.MemberDTO;
-import org.aspectj.lang.annotation.After;
+import com.sidepj.ithurts.service.dto.MemberJoinDTO;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.jdbc.Sql;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -34,11 +32,11 @@ class MemberServiceTest {
 
     @Test
     void join() {
-        MemberDTO memberDTO1 = new MemberDTO("Yunsik", "xxxx", "User");
-        MemberDTO memberDTO2 = new MemberDTO("Mason", "abcedfg", "Admin");
-        MemberDTO memberDTO3 = new MemberDTO("", "jackson", "User");
-        Member yunsikJoin = memberService.join(memberDTO1, memberDTO1.getRole());
-        Member masonJoin = memberService.join(memberDTO2, memberDTO2.getRole());
+        MemberJoinDTO memberJoinDTO1 = new MemberJoinDTO("Yunsik", "xxxx", "User");
+        MemberJoinDTO memberJoinDTO2 = new MemberJoinDTO("Mason", "abcedfg", "Admin");
+        MemberJoinDTO memberJoinDTO3 = new MemberJoinDTO("", "jackson", "User");
+        Member yunsikJoin = memberService.join(memberJoinDTO1, memberJoinDTO1.getRole());
+        Member masonJoin = memberService.join(memberJoinDTO2, memberJoinDTO2.getRole());
 
         Long yunsikId = yunsikJoin.getId();
         Long masonId = masonJoin.getId();
@@ -46,43 +44,43 @@ class MemberServiceTest {
         em.flush();
         em.clear();
 
-        MemberDTO yunsik = memberService.getMember("Yunsik");
-        MemberDTO mason = memberService.getMember("Mason");
+        MemberJoinDTO yunsik = memberService.getMember("Yunsik");
+        MemberJoinDTO mason = memberService.getMember("Mason");
 
 
         org.assertj.core.api.Assertions.assertThat(yunsik.getId()).isEqualTo(yunsikId);
         org.assertj.core.api.Assertions.assertThat(mason.getId()).isEqualTo(masonId);
-        Assertions.assertThrows(IllegalArgumentException.class ,() -> memberService.join(memberDTO3, memberDTO3.getRole()));
+        Assertions.assertThrows(IllegalArgumentException.class ,() -> memberService.join(memberJoinDTO3, memberJoinDTO3.getRole()));
     }
 
 
     @Test
     void getMembers() {
-        MemberDTO memberDTO1 = new MemberDTO("Yunsik", "xxxx", "User");
-        MemberDTO memberDTO2 = new MemberDTO("Mason", "abcedfg", "Admin");
-        Member yunsikJoin = memberService.join(memberDTO1, memberDTO1.getRole());
-        Member masonJoin = memberService.join(memberDTO2, memberDTO2.getRole());
-        List<MemberDTO> members = memberService.getMembers();
+        MemberJoinDTO memberJoinDTO1 = new MemberJoinDTO("Yunsik", "xxxx", "User");
+        MemberJoinDTO memberJoinDTO2 = new MemberJoinDTO("Mason", "abcedfg", "Admin");
+        Member yunsikJoin = memberService.join(memberJoinDTO1, memberJoinDTO1.getRole());
+        Member masonJoin = memberService.join(memberJoinDTO2, memberJoinDTO2.getRole());
+        List<MemberJoinDTO> members = memberService.getMembers();
         org.assertj.core.api.Assertions.assertThat(members).hasSize(2);
     }
 
     @Test
     void getMember() {
-        MemberDTO memberDTO1 = new MemberDTO("Yunsik", "xxxx", "User");
-        Member join = memberService.join(memberDTO1, memberDTO1.getRole());
+        MemberJoinDTO memberJoinDTO1 = new MemberJoinDTO("Yunsik", "xxxx", "User");
+        Member join = memberService.join(memberJoinDTO1, memberJoinDTO1.getRole());
 
         em.flush();
         em.clear();
 
-        MemberDTO yunsik = memberService.getMember("Yunsik");
+        MemberJoinDTO yunsik = memberService.getMember("Yunsik");
         org.assertj.core.api.Assertions.assertThat(yunsik.getId()).isEqualTo(join.getId());
 
     }
 
     @Test
     void getRole() {
-        MemberDTO memberDTO1 = new MemberDTO("Yunsik", "xxxx", "User");
-        Member join = memberService.join(memberDTO1, memberDTO1.getRole());
+        MemberJoinDTO memberJoinDTO1 = new MemberJoinDTO("Yunsik", "xxxx", "User");
+        Member join = memberService.join(memberJoinDTO1, memberJoinDTO1.getRole());
 
         em.flush();
         em.clear();

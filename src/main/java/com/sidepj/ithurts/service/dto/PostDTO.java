@@ -1,18 +1,16 @@
 package com.sidepj.ithurts.service.dto;
 
-import com.sidepj.ithurts.domain.Comment;
 import com.sidepj.ithurts.domain.Post;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 public class PostDTO {
 
     private Long id;
 
-    private MemberDTO memberDTO;
+    private MemberControllerDTO memberControllerDTO;
 
     private String name;
 
@@ -24,12 +22,18 @@ public class PostDTO {
 
     private String postType;
 
+    private int commentCount;
+
+    private int loveCount;
+
     public PostDTO(Post post){
         this.id = post.getId();
         this.name = post.getPostName();
         this.content = post.getContent();
         this.createdDate = post.getCreatedDate();
-        this.memberDTO = new MemberDTO(post.getPostMember());
+        this.memberControllerDTO = new MemberControllerDTO(post.getPostMember());
+        this.commentCount = post.getComments().size();
+        this.loveCount = post.getLoves().size();
     }
 
 }

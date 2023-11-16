@@ -1,9 +1,8 @@
 package com.sidepj.ithurts.service;
 
 import com.sidepj.ithurts.domain.Member;
-import com.sidepj.ithurts.domain.Report;
 import com.sidepj.ithurts.repository.MemberRepository;
-import com.sidepj.ithurts.service.dto.MemberDTO;
+import com.sidepj.ithurts.service.dto.MemberJoinDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -20,41 +19,41 @@ public class MemberSerivceImpl implements MemberService {
     private final MemberRepository memberRepository;
 
     @Override
-    public List<MemberDTO> getMembers() {
+    public List<MemberJoinDTO> getMembers() {
         List<Member> allMembers = memberRepository.findAll();
         return getMemberDTOS(allMembers);
     }
 
     @Override
-    public MemberDTO getMember(String memberName) {
-        return new MemberDTO(memberRepository.findMemberByName(memberName));
+    public MemberJoinDTO getMember(String memberName) {
+        return new MemberJoinDTO(memberRepository.findMemberByName(memberName));
     }
 
     @Override
     public String getRole(String memberName) {
-        return new MemberDTO(memberRepository.findMemberByName(memberName)).getRole();
+        return new MemberJoinDTO(memberRepository.findMemberByName(memberName)).getRole();
     }
 
     @Override
-    public Member join(MemberDTO memberDTO, String userRole) {
-        checkMemberValidity(memberDTO, userRole);
-        return memberRepository.save(new Member(memberDTO, userRole));
+    public Member join(MemberJoinDTO memberJoinDTO, String userRole) {
+        checkMemberValidity(memberJoinDTO, userRole);
+        return memberRepository.save(new Member(memberJoinDTO, userRole));
     }
 
-    private List<MemberDTO> getMemberDTOS(List<Member> allMembers) {
-        List<MemberDTO> allMembersTransferedDTO = new ArrayList<>();
+    private List<MemberJoinDTO> getMemberDTOS(List<Member> allMembers) {
+        List<MemberJoinDTO> allMembersTransferedDTO = new ArrayList<>();
         for (Member allMember : allMembers) {
-            MemberDTO memberDTO = new MemberDTO(allMember);
-            allMembersTransferedDTO.add(memberDTO);
+            MemberJoinDTO memberJoinDTO = new MemberJoinDTO(allMember);
+            allMembersTransferedDTO.add(memberJoinDTO);
         }
         return allMembersTransferedDTO;
     }
 
-    private void checkMemberValidity(MemberDTO memberDTO, String userRole){
-        if(memberDTO.getUsername() == null || !StringUtils.hasText(memberDTO.getUsername())){
+    private void checkMemberValidity(MemberJoinDTO memberJoinDTO, String userRole){
+        if(memberJoinDTO.getUsername() == null || !StringUtils.hasText(memberJoinDTO.getUsername())){
             throw new IllegalArgumentException("이름을 입력해야 합니다");
         }
-        if(memberDTO.getPassword() == null || !StringUtils.hasText(memberDTO.getPassword())){
+        if(memberJoinDTO.getPassword() == null || !StringUtils.hasText(memberJoinDTO.getPassword())){
             throw new IllegalArgumentException("비밀번호를 입력하세요");
         }
         if(!StringUtils.hasText(userRole)){
@@ -62,7 +61,7 @@ public class MemberSerivceImpl implements MemberService {
         }
 
 
-        Member memberByName = memberRepository.findMemberByName(memberDTO.getUsername());
+        Member memberByName = memberRepository.findMemberByName(memberJoinDTO.getUsername());
         if(memberByName != null){
             throw new IllegalArgumentException("이미 동일한 이름의 계정이 존재합니다");
         }

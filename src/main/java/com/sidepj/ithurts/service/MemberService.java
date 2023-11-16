@@ -1,19 +1,18 @@
 package com.sidepj.ithurts.service;
 
 import com.sidepj.ithurts.domain.Member;
-import com.sidepj.ithurts.domain.Report;
-import com.sidepj.ithurts.service.dto.MemberDTO;
+import com.sidepj.ithurts.service.dto.MemberJoinDTO;
 
 import java.util.List;
 
 public interface MemberService {
-    List<MemberDTO> getMembers();
+    List<MemberJoinDTO> getMembers();
 
-    MemberDTO getMember(String memberName);
+    MemberJoinDTO getMember(String memberName);
 
     String getRole(String memberName);
 
-    Member join(MemberDTO member, String userRole);
+    Member join(MemberJoinDTO member, String userRole);
 
 
 }

@@ -2,7 +2,7 @@ package com.sidepj.ithurts.service;
 
 import com.sidepj.ithurts.domain.Member;
 import com.sidepj.ithurts.domain.Post;
-import com.sidepj.ithurts.service.dto.MemberDTO;
+import com.sidepj.ithurts.service.dto.MemberJoinDTO;
 import com.sidepj.ithurts.service.dto.PostDTO;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
@@ -15,9 +15,6 @@ import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
 import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
@@ -41,7 +38,7 @@ class PostServiceTest {
 
     @Test
     void savePost() {
-        MemberDTO author = new MemberDTO("mason", "xxxx", "User");
+        MemberJoinDTO author = new MemberJoinDTO("mason", "xxxx", "User");
         Member join = memberService.join(author, author.getRole());
         Post testPost1 = new Post("test post 1", "test content 1", join);
         postService.savePost(testPost1);
@@ -49,7 +46,7 @@ class PostServiceTest {
 
     @Test
     void getPost() {
-        MemberDTO author = new MemberDTO("mason", "xxxx", "User");
+        MemberJoinDTO author = new MemberJoinDTO("mason", "xxxx", "User");
         Member join = memberService.join(author, author.getRole());
         Post testPost1 = new Post("test post 1", "test content 1", join);
         PostDTO savedPost = postService.savePost(testPost1);
@@ -64,7 +61,7 @@ class PostServiceTest {
 
     @Test
     void removePost() {
-        MemberDTO author = new MemberDTO("mason", "xxxx", "User");
+        MemberJoinDTO author = new MemberJoinDTO("mason", "xxxx", "User");
         Member join = memberService.join(author, author.getRole());
         Post testPost1 = new Post("test post 1", "test content 1", join);
         PostDTO savedPost = postService.savePost(testPost1);
@@ -80,7 +77,7 @@ class PostServiceTest {
 
     @Test
     void getAllPosts() {
-        MemberDTO author = new MemberDTO("mason", "xxxx", "User");
+        MemberJoinDTO author = new MemberJoinDTO("mason", "xxxx", "User");
         Member join = memberService.join(author, author.getRole());
         Post testPost1 = new Post("test post 1", "test content 1", join);
         Post testPost2 = new Post("test post 2", "test content 2", join);
@@ -100,7 +97,7 @@ class PostServiceTest {
 
     @Test
     void getPostByName() {
-        MemberDTO author = new MemberDTO("mason", "xxxx", "User");
+        MemberJoinDTO author = new MemberJoinDTO("mason", "xxxx", "User");
         Member join = memberService.join(author, author.getRole());
         Post testPost1 = new Post("test post 1", "test content 1", join);
         Post testPost2 = new Post("test post 2", "test content 2", join);
@@ -124,8 +121,8 @@ class PostServiceTest {
 
     @Test
     void getPostByMember() {
-        MemberDTO author1 = new MemberDTO("mason", "xxxx", "User");
-        MemberDTO author2 = new MemberDTO("yunsik", "xxxxxx", "Admin");
+        MemberJoinDTO author1 = new MemberJoinDTO("mason", "xxxx", "User");
+        MemberJoinDTO author2 = new MemberJoinDTO("yunsik", "xxxxxx", "Admin");
         Member savedAuthor1 = memberService.join(author1, author1.getRole());
         Member savedAuthor2 = memberService.join(author2, author2.getRole());
         Post testPost1 = new Post("test post 1", "test content 1", savedAuthor1);
@@ -150,8 +147,8 @@ class PostServiceTest {
 
     @Test
     void getPostByContent() {
-        MemberDTO author1 = new MemberDTO("mason", "xxxx", "User");
-        MemberDTO author2 = new MemberDTO("yunsik", "xxxxxx", "Admin");
+        MemberJoinDTO author1 = new MemberJoinDTO("mason", "xxxx", "User");
+        MemberJoinDTO author2 = new MemberJoinDTO("yunsik", "xxxxxx", "Admin");
         Member savedAuthor1 = memberService.join(author1, author1.getRole());
         Member savedAuthor2 = memberService.join(author2, author2.getRole());
         Post testPost1 = new Post("test post 1", "test content 1", savedAuthor1);
