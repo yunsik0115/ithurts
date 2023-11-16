@@ -2,6 +2,7 @@ package com.sidepj.ithurts.service;
 
 import com.sidepj.ithurts.domain.Member;
 import com.sidepj.ithurts.repository.MemberRepository;
+import com.sidepj.ithurts.service.dto.MemberControllerDTO;
 import com.sidepj.ithurts.service.dto.MemberJoinDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,28 +20,41 @@ public class MemberSerivceImpl implements MemberService {
     private final MemberRepository memberRepository;
 
     @Override
-    public List<MemberJoinDTO> getMembers() {
+    public List<MemberControllerDTO> getMembers() {
         List<Member> allMembers = memberRepository.findAll();
-        return getMemberDTOS(allMembers);
+        return getMemberControllerDTOs(allMembers);
     }
 
     @Override
-    public MemberJoinDTO getMember(String memberName) {
-        return new MemberJoinDTO(memberRepository.findMemberByName(memberName));
+    public MemberControllerDTO getMember(String memberName) {
+        return new MemberControllerDTO(memberRepository.findMemberByName(memberName));
     }
 
     @Override
     public String getRole(String memberName) {
-        return new MemberJoinDTO(memberRepository.findMemberByName(memberName)).getRole();
+        return new MemberControllerDTO(memberRepository.findMemberByName(memberName)).getRole();
     }
 
     @Override
-    public Member join(MemberJoinDTO memberJoinDTO, String userRole) {
+    public MemberControllerDTO join(MemberJoinDTO memberJoinDTO, String userRole) {
         checkMemberValidity(memberJoinDTO, userRole);
-        return memberRepository.save(new Member(memberJoinDTO, userRole));
+        Member savedMember = memberRepository.save(new Member(memberJoinDTO, userRole));
+        return new MemberControllerDTO(savedMember);
+
     }
 
-    private List<MemberJoinDTO> getMemberDTOS(List<Member> allMembers) {
+    private List<MemberControllerDTO> getMemberControllerDTOs(List<Member> allMembers) {
+        List<MemberControllerDTO> allMembersTransferedDTO = new ArrayList<>();
+        for (Member allMember : allMembers) {
+            MemberControllerDTO memberControllerDTO = new MemberControllerDTO(allMember);
+            allMembersTransferedDTO.add(memberControllerDTO);
+        }
+        return allMembersTransferedDTO;
+    }
+
+
+    // DTO for admin page
+    private List<MemberJoinDTO> getMemberJoinDTOs(List<Member> allMembers) {
         List<MemberJoinDTO> allMembersTransferedDTO = new ArrayList<>();
         for (Member allMember : allMembers) {
             MemberJoinDTO memberJoinDTO = new MemberJoinDTO(allMember);

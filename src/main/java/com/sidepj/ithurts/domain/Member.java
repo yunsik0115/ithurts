@@ -42,7 +42,7 @@ public class Member {
     @OneToMany(mappedBy = "member")
     private List<SocialMember> socialMembers = new ArrayList<>();
 
-    @OneToMany(mappedBy = "comment_member")
+    @OneToMany(mappedBy = "author")
     private List<Comment> comments = new ArrayList<>();
 
     @OneToMany(mappedBy = "postMember")

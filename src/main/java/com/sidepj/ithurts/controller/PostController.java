@@ -35,14 +35,14 @@ public class PostController {
         model.addAttribute("posts", posts);
         return "posts.html";
     }
-
-    @GetMapping("/posts/search")
-    public String searchPostByContent(@RequestParam(required = false) String content, Model model) {
-
-        List<PostDTO> posts = postService.getPostByContent(content);
-        model.addAttribute("posts", posts);
-        return "posts.html";
-    }
+//    TO-DO  Ambiguous Controller Mapping (how am I going to separate logic when it comes to content not name?
+//    @GetMapping("/posts/search")
+//    public String searchPostByContent(@RequestParam(required = false) String content, Model model) {
+//
+//        List<PostDTO> posts = postService.getPostByContent(content);
+//        model.addAttribute("posts", posts);
+//        return "posts.html";
+//    }
 
     @GetMapping("/posts/search")
     public String searchPostByAuthor(@RequestParam(required = false) String author, Model model) {

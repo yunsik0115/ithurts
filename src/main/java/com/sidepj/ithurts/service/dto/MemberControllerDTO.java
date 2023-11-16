@@ -22,5 +22,4 @@ public class MemberControllerDTO {
         this.role = member.getRole();
     }
 
-
 }
