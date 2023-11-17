@@ -9,10 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.sql.Array;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,9 +29,9 @@ public class HospitalService implements DataService<HospitalControllerDTO> {
         if(retrievedFromDB.isEmpty()){
             SearchCondition sc = SearchCondition.builder().officeName(officeName).build();
             // DB에 Persist는 이미 완료된 상태
-            return transferToDTO(openAPIHospitalDataService.retrieve(sc));
+            return transferToDTOS(openAPIHospitalDataService.retrieve(sc));
         }
-        return transferToDTO(retrievedFromDB);
+        return transferToDTOS(retrievedFromDB);
     }
 
     @Override
@@ -40,10 +39,10 @@ public class HospitalService implements DataService<HospitalControllerDTO> {
         List<Hospital> retrievedFromDB = hospitalRepository.findByAddressContains(cityName, "");
         if(retrievedFromDB.isEmpty()){
             SearchCondition sc = SearchCondition.builder().city(cityName).build();
-            return transferToDTO(openAPIHospitalDataService.retrieve(sc));
+            return transferToDTOS(openAPIHospitalDataService.retrieve(sc));
             // DB에 Persist는 이미 완료된 상태
         }
-        return transferToDTO(retrievedFromDB);
+        return transferToDTOS(retrievedFromDB);
     }
 
     @Override
@@ -51,10 +50,10 @@ public class HospitalService implements DataService<HospitalControllerDTO> {
         List<Hospital> retrievedFromDB = hospitalRepository.findByAddressContains(cityName, detailedCity);
         if(retrievedFromDB.isEmpty()){
             SearchCondition sc = SearchCondition.builder().city(cityName).detailedCity(detailedCity).build();
-            return transferToDTO(openAPIHospitalDataService.retrieve(sc));
+            return transferToDTOS(openAPIHospitalDataService.retrieve(sc));
 
         }
-        return transferToDTO(retrievedFromDB);
+        return transferToDTOS(retrievedFromDB);
     }
 
     @Override
@@ -62,11 +61,11 @@ public class HospitalService implements DataService<HospitalControllerDTO> {
         List<Hospital> retrievedFromDB = hospitalRepository.findByHospitalType(serviceType);
         if(retrievedFromDB.isEmpty()){
             SearchCondition sc = SearchCondition.builder().servicePart(serviceType).build();
-            return transferToDTO(openAPIHospitalDataService.retrieve(sc));
+            return transferToDTOS(openAPIHospitalDataService.retrieve(sc));
             // DB에 Persist는 이미 완료된 상태
 
         }
-        return transferToDTO(retrievedFromDB);
+        return transferToDTOS(retrievedFromDB);
     }
 
     @Override
@@ -76,16 +75,33 @@ public class HospitalService implements DataService<HospitalControllerDTO> {
 
     @Override
     public List<HospitalControllerDTO> getAll() {
-        return transferToDTO(hospitalRepository.findAll());
+        return transferToDTOS(hospitalRepository.findAll());
+    }
+
+    @Override
+    public HospitalControllerDTO findById(Long id) {
+        Optional<Hospital> findHospital = hospitalRepository.findById(id);
+        if(findHospital.isPresent()){
+            Hospital hospital = findHospital.get();
+            return new HospitalControllerDTO(hospital);
+        }
     }
 
     @Override
     public List<HospitalControllerDTO> retrieveAll() {
         SearchCondition searchCondition = SearchCondition.builder().city("서울특별시").detailedCity("광진구").searchAll(true).build();
-        return transferToDTO(openAPIHospitalDataService.retrieve(searchCondition));
+        return transferToDTOS(openAPIHospitalDataService.retrieve(searchCondition));
     }
 
-    public List<HospitalControllerDTO> transferToDTO(List<Hospital> hospitalList){
+    public List<HospitalControllerDTO> transferToDTOS(List<Hospital> hospitalList){
+        List<HospitalControllerDTO> list = new ArrayList<>();
+        for (Hospital hospital : hospitalList) {
+            list.add(entityDtoTransferValidation(hospital));
+        }
+        return list;
+    }
+
+    public HospitalControllerDTO transferToDTO(Hospital hospitalList){
         List<HospitalControllerDTO> list = new ArrayList<>();
         for (Hospital hospital : hospitalList) {
             list.add(entityDtoTransferValidation(hospital));
