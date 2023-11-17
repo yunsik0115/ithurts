@@ -13,6 +13,7 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -56,6 +57,17 @@ public class PharmacyService implements DataService<PharmacyControllerDTO> {
             return transferToDTO(retrieve);
         }
         return transferToDTO(retrievedFromDB);
+    }
+
+    @Override
+    public PharmacyControllerDTO findById(Long id) {
+        Optional<Pharmacy> optionalPharmacy = pharmacyRepository.findById(id);
+        if(optionalPharmacy.isPresent()){
+            Pharmacy pharmacy = optionalPharmacy.get();
+            return entityDtoTransferValidation(pharmacy);
+        } else{
+            throw new IllegalArgumentException("해당 약국 정보를 가져올 수 없습니다");
+        }
     }
 
     @Override

@@ -83,7 +83,9 @@ public class HospitalService implements DataService<HospitalControllerDTO> {
         Optional<Hospital> findHospital = hospitalRepository.findById(id);
         if(findHospital.isPresent()){
             Hospital hospital = findHospital.get();
-            return new HospitalControllerDTO(hospital);
+            return entityDtoTransferValidation(hospital);
+        } else{
+            throw new IllegalArgumentException("해당 병원 정보를 가져올 수 없습니다");
         }
     }
 
@@ -101,17 +103,10 @@ public class HospitalService implements DataService<HospitalControllerDTO> {
         return list;
     }
 
-    public HospitalControllerDTO transferToDTO(Hospital hospitalList){
-        List<HospitalControllerDTO> list = new ArrayList<>();
-        for (Hospital hospital : hospitalList) {
-            list.add(entityDtoTransferValidation(hospital));
-        }
-        return list;
-    }
-
     public HospitalControllerDTO entityDtoTransferValidation(Hospital entity){
         HospitalControllerDTO dto = new HospitalControllerDTO();
         if(entity.getId() != null){
+
             dto.setId(entity.getId());
         }
 

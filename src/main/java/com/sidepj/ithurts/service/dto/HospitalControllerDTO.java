@@ -14,6 +14,8 @@ public class HospitalControllerDTO {
 
     private String contact;
 
+    private String hospitalType;
+
     private String address;
 
     private Double x_cord;
@@ -26,5 +28,6 @@ public class HospitalControllerDTO {
     public HospitalControllerDTO(){
 
     }
+
 
 }
