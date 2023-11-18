@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 public class Report {
 
     @Id
-    @Column(name = "report_id")
-    private int id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
 
     @ManyToOne
