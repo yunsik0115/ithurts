@@ -1,46 +1,67 @@
 package com.sidepj.ithurts.controller;
 
+import com.sidepj.ithurts.service.DataService;
+import com.sidepj.ithurts.service.MemberService;
+import com.sidepj.ithurts.service.PostService;
+import com.sidepj.ithurts.service.dto.HospitalControllerDTO;
+import com.sidepj.ithurts.service.dto.MemberControllerDTO;
+import com.sidepj.ithurts.service.dto.PharmacyControllerDTO;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/admin/manage")
+@RequiredArgsConstructor
 public class AdminController {
 
+    private final PostService postService;
+    private final MemberService memberService;
+    private final DataService<HospitalControllerDTO> hospitalService;
+    private final DataService<PharmacyControllerDTO> pharmacyService;
+
+    // TO - DO 일관성 있는 naming 규칙 적용 필요 user <-> member 불일치 등등
+
     @GetMapping("/users")
-    public String getAllAccountInfo(){
+    public String getAllAccountInfo(Model model){
+        model.addAttribute("accounts", memberService.getMembers());
         return "users.html";
     }
 
     @GetMapping("/users/{userId}")
-    public String getAccountInfo(){
+    public String getAccountInfo(@PathVariable Long userId, Model model){
+        MemberControllerDTO member = memberService.getMemberById(userId);
+        model.addAttribute("user", member);
         return "user.html";
     }
 
     @PatchMapping("/users/{userId}")
-    public String updateAccountInfo(){
+    public String updateAccountInfo(@PathVariable Long userId, @ModelAttribute MemberControllerDTO memberControllerDTO){
+        memberService.updateMemberById(userId, memberControllerDTO);
         return "user.html";
     }
 
-    @GetMapping("/messages")
-    public String getAllNotifications(){
-        return "notification.html";
-    }
-
-    @GetMapping("/message/{messageId}")
-    public String getNotification(){
-        return "notification.html";
-    }
-
-    @GetMapping("/message")
-    public String notificationForm(){
-        return "notification.html";
-    }
-
-    @PostMapping("/message")
-    public String notification(){
-        return "notificiation.html";
-    }
+    // Repository hasn't implemented yet.
+//    @GetMapping("/messages")
+//    public String getAllNotifications(){
+//        return "notification.html";
+//    }
+//
+//    @GetMapping("/message/{messageId}")
+//    public String getNotification(){
+//        return "notification.html";
+//    }
+//
+//    @GetMapping("/message")
+//    public String notificationForm(){
+//        return "notification.html";
+//    }
+//
+//    @PostMapping("/message")
+//    public String notification(){
+//        return "notificiation.html";
+//    }
 
     @GetMapping("/reports")
     public String reports(){
