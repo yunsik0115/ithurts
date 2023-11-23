@@ -69,22 +69,27 @@ public class AdminController {
     }
 
     @GetMapping("/reports/{reportId}")
-    public String getReport(){
+    public String getReport(@PathVariable Long reportId, Model model){
+        reportService.getReport(reportId);
         return "report.html";
     }
 
-    @PostMapping("/reports/{reportId}")
-    public String processReport(){
-        return "report.html";
-    }
+//    @PostMapping("/reports/{reportId}")
+//    public String processReport(){
+//
+//        return "report.html";
+//    }
 
     @PatchMapping("/reports/{reportId}")
-    public String modifyingReport(){
+    public String modifyingReport(@PathVariable Long reportId){
+        reportService.findById(reportId);
+
         return "report.html";
     }
 
     @DeleteMapping("/reports/{reportId}")
-    public String deleteReport(){
+    public String deleteReport(@PathVariable Long reportId){
+        reportService.remove(reportId);
         return "report.html";
     }
 
