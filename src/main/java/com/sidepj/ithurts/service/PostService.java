@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public interface PostService {
 
-    PostDTO savePost(PostDTO post);
+    PostDTO savePost(Post post);
 
     PostDTO getPost(Long id);
 
