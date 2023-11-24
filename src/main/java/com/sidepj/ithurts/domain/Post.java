@@ -1,5 +1,7 @@
 package com.sidepj.ithurts.domain;
 
+import com.sidepj.ithurts.controller.MemberController;
+import com.sidepj.ithurts.service.dto.MemberControllerDTO;
 import com.sidepj.ithurts.service.dto.PostDTO;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -22,7 +24,7 @@ public class Post {
     @Column(name = "post_id")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne // 추후 수정 (컨트롤러에서 유저 찾아서 넣어줘야함)
     @JoinColumn(name = "member_id")
     private Member postMember; // fk for indicate which user created this post.
 
@@ -49,10 +51,16 @@ public class Post {
 
 
     // Constructor for testing (Temporary)
-    public Post(String postName, String content, Member postMember) {
-        this.postMember = postMember;
+    public Post(String postName, String content) {
         this.postName = postName;
         this.content = content;
+    }
+
+    public Post(PostDTO postDTO){
+        this.postName = postDTO.getName();
+        this.content = postDTO.getContent();
+        this.createdDate = LocalDateTime.now();
+        this.postType = postDTO.getPostType();
     }
 
 }

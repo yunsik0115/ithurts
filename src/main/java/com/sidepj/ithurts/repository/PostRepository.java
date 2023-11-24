@@ -23,7 +23,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Optional<List<Post>> findPostsByPostName(@Param("postName") String postName);
 
     // Member의 이름을 기준으로 Post 검색
-    @Query("select p from Post p join p.postMember where p.postMember.name = :name")
+    @Query("select p from Post p join p.postMember where p.postMember = :name")
     Optional<List<Post>> findPostsByMemberName(@Param("name") String name);
 
     // searchContent의 내용이 content의 일부인 글들을 검색함.

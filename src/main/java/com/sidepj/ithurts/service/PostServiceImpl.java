@@ -20,8 +20,9 @@ public class PostServiceImpl implements PostService{
     private final PostRepository postRepository;
 
     @Override
-    public PostDTO savePost(Post post) { // TO-DO Refactor for Controller returning DTOS.
-        return new PostDTO(postRepository.save(post));
+    public PostDTO savePost(PostDTO postDTO) {
+        Post save = postRepository.save(new Post(postDTO));
+        return new PostDTO(save);
     }
 
     @Override

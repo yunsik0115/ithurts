@@ -2,6 +2,7 @@ package com.sidepj.ithurts.service;
 
 import com.sidepj.ithurts.domain.Member;
 import com.sidepj.ithurts.domain.Post;
+import com.sidepj.ithurts.service.dto.MemberControllerDTO;
 import com.sidepj.ithurts.service.dto.MemberJoinDTO;
 import com.sidepj.ithurts.service.dto.PostDTO;
 import org.assertj.core.api.Assertions;
@@ -39,17 +40,17 @@ class PostServiceTest {
     @Test
     void savePost() {
         MemberJoinDTO author = new MemberJoinDTO("mason", "xxxx", "User");
-        Member join = memberService.join(author, author.getRole());
+        MemberControllerDTO join = memberService.join(author, author.getRole());
         Post testPost1 = new Post("test post 1", "test content 1", join);
-        postService.savePost(testPost1);
+        postService.savePost(new PostDTO(testPost1));
     }
 
     @Test
     void getPost() {
         MemberJoinDTO author = new MemberJoinDTO("mason", "xxxx", "User");
-        Member join = memberService.join(author, author.getRole());
+        MemberControllerDTO join = memberService.join(author, author.getRole());
         Post testPost1 = new Post("test post 1", "test content 1", join);
-        PostDTO savedPost = postService.savePost(testPost1);
+        PostDTO savedPost = postService.savePost(new PostDTO(testPost1));
         Long savedPostId = savedPost.getId();
 
         em.flush();
@@ -62,9 +63,9 @@ class PostServiceTest {
     @Test
     void removePost() {
         MemberJoinDTO author = new MemberJoinDTO("mason", "xxxx", "User");
-        Member join = memberService.join(author, author.getRole());
+        MemberControllerDTO join = memberService.join(author, author.getRole());
         Post testPost1 = new Post("test post 1", "test content 1", join);
-        PostDTO savedPost = postService.savePost(testPost1);
+        PostDTO savedPost = postService.savePost(new PostDTO(testPost1));
 
         em.flush();
         em.clear();
@@ -78,15 +79,15 @@ class PostServiceTest {
     @Test
     void getAllPosts() {
         MemberJoinDTO author = new MemberJoinDTO("mason", "xxxx", "User");
-        Member join = memberService.join(author, author.getRole());
+        MemberControllerDTO join = memberService.join(author, author.getRole());
         Post testPost1 = new Post("test post 1", "test content 1", join);
         Post testPost2 = new Post("test post 2", "test content 2", join);
         Post testPost3 = new Post("test post 3", "test content 3", join);
         Post testPost4 = new Post("test post 4", "test content 4", join);
-        postService.savePost(testPost1);
-        postService.savePost(testPost2);
-        postService.savePost(testPost3);
-        postService.savePost(testPost4);
+        postService.savePost(new PostDTO(testPost1));
+        postService.savePost(new PostDTO(testPost2));
+        postService.savePost(new PostDTO(testPost3));
+        postService.savePost(new PostDTO(testPost4));
 
         em.flush();
         em.clear();
@@ -98,17 +99,17 @@ class PostServiceTest {
     @Test
     void getPostByName() {
         MemberJoinDTO author = new MemberJoinDTO("mason", "xxxx", "User");
-        Member join = memberService.join(author, author.getRole());
+        MemberControllerDTO join = memberService.join(author, author.getRole());
         Post testPost1 = new Post("test post 1", "test content 1", join);
         Post testPost2 = new Post("test post 2", "test content 2", join);
         Post testPost3 = new Post("test post 3", "test content 3", join);
         Post testPost4 = new Post("test post 4", "test content 4", join);
         Post testPostDuplicate = new Post("test post 1", "test content 2", join);
-        postService.savePost(testPost1);
-        postService.savePost(testPost2);
-        postService.savePost(testPost3);
-        postService.savePost(testPost4);
-        postService.savePost(testPostDuplicate);
+        postService.savePost(new PostDTO(testPost1));
+        postService.savePost(new PostDTO(testPost2));
+        postService.savePost(new PostDTO(testPost3));
+        postService.savePost(new PostDTO(testPost4));
+        postService.savePost(new PostDTO(testPostDuplicate));
 
         em.flush();
         em.clear();
@@ -123,18 +124,18 @@ class PostServiceTest {
     void getPostByMember() {
         MemberJoinDTO author1 = new MemberJoinDTO("mason", "xxxx", "User");
         MemberJoinDTO author2 = new MemberJoinDTO("yunsik", "xxxxxx", "Admin");
-        Member savedAuthor1 = memberService.join(author1, author1.getRole());
-        Member savedAuthor2 = memberService.join(author2, author2.getRole());
+        MemberControllerDTO savedAuthor1 = memberService.join(author1, author1.getRole());
+        MemberControllerDTO savedAuthor2 = memberService.join(author2, author2.getRole());
         Post testPost1 = new Post("test post 1", "test content 1", savedAuthor1);
         Post testPost2 = new Post("test post 2", "test content 2", savedAuthor1);
         Post testPost3 = new Post("test post 3", "test content 3", savedAuthor1);
         Post testPost4 = new Post("test post 4", "test content 4", savedAuthor2);
         Post testPostDuplicate = new Post("test post 1", "test content 2", savedAuthor2);
-        postService.savePost(testPost1);
-        postService.savePost(testPost2);
-        postService.savePost(testPost3);
-        postService.savePost(testPost4);
-        postService.savePost(testPostDuplicate);
+        postService.savePost(new PostDTO(testPost1));
+        postService.savePost(new PostDTO(testPost2));
+        postService.savePost(new PostDTO(testPost3));
+        postService.savePost(new PostDTO(testPost4));
+        postService.savePost(new PostDTO(testPostDuplicate));
 
         em.flush();
         em.clear();
@@ -149,18 +150,18 @@ class PostServiceTest {
     void getPostByContent() {
         MemberJoinDTO author1 = new MemberJoinDTO("mason", "xxxx", "User");
         MemberJoinDTO author2 = new MemberJoinDTO("yunsik", "xxxxxx", "Admin");
-        Member savedAuthor1 = memberService.join(author1, author1.getRole());
-        Member savedAuthor2 = memberService.join(author2, author2.getRole());
+        MemberControllerDTO savedAuthor1 = memberService.join(author1, author1.getRole());
+        MemberControllerDTO savedAuthor2 = memberService.join(author2, author2.getRole());
         Post testPost1 = new Post("test post 1", "test content 1", savedAuthor1);
         Post testPost2 = new Post("test post 2", "test content 2", savedAuthor1);
         Post testPost3 = new Post("test post 3", "test content 3", savedAuthor1);
         Post testPost4 = new Post("test post 4", "test content 4", savedAuthor2);
         Post testPostDuplicate = new Post("test post 1", "test content 2", savedAuthor2);
-        postService.savePost(testPost1);
-        postService.savePost(testPost2);
-        postService.savePost(testPost3);
-        postService.savePost(testPost4);
-        postService.savePost(testPostDuplicate);
+        postService.savePost(new PostDTO(testPost1));
+        postService.savePost(new PostDTO(testPost2));
+        postService.savePost(new PostDTO(testPost3));
+        postService.savePost(new PostDTO(testPost4));
+        postService.savePost(new PostDTO(testPostDuplicate));
 
         em.flush();
         em.clear();
