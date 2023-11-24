@@ -1,5 +1,6 @@
 package com.sidepj.ithurts.controller.interceptor;
 
+import com.sidepj.ithurts.service.SessionConst;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -16,9 +17,8 @@ public class LoginInterceptor implements HandlerInterceptor {
         log.info("로그인 인터셉터 실행 {}", requestURI);
 
         HttpSession session = request.getSession();
-        if(session == null){
-            log.info("미 로그인된 사용자 접근");
-            response.sendRedirect("/login?redirectURL=" + requestURI);
+        if(session == null || session.getAttribute(SessionConst.LOGIN_MEMBER) == null){
+            log.info("미 로그인된 사용자 접근 {}", requestURI);
             return false;
         }
         return true;
