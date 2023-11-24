@@ -15,6 +15,9 @@ public class IthurtsApplication implements WebMvcConfigurer {
 		SpringApplication.run(IthurtsApplication.class, args);
 	}
 
+
+	// TO-DO - API Specification 확정 이후, Login Interceptor 범위 확정할 것
+	// After Consolidating API Specification, Login Interceptor Application Range Should be Specified.
 //	@Override
 //	public void addInterceptors(InterceptorRegistry registry) {
 //		registry.addInterceptor(new LoginInterceptor())

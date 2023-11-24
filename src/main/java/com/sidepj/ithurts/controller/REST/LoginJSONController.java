@@ -24,7 +24,7 @@ public class LoginJSONController {
 
     @PostMapping("/login")
     @ResponseBody
-    public String loginJson(@Valid @RequestBody LoginForm form, HttpServletRequest request ,HttpServletResponse response){
+    public String loginJson(@Valid @RequestBody LoginForm form, HttpServletRequest request ,HttpServletResponse response) throws Exception{
         loginService.login(form.getUsername(), form.getPassword(), request, response);
         return "ok";
     }
@@ -36,12 +36,7 @@ public class LoginJSONController {
         return "OK";
     }
 
-    @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<ErrorResult> loginExceptionHandler(NoSuchElementException e){
-        log.error("[Login Error e] = {}", e.getMessage());
-        ErrorResult errorResult = new ErrorResult(HttpStatus.BAD_REQUEST.toString(), e.getMessage());
-        return new ResponseEntity<>(errorResult, HttpStatus.BAD_REQUEST);
-    }
+
 
     /*
     === API Exception Process ===
