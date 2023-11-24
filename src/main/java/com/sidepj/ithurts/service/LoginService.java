@@ -3,7 +3,6 @@ package com.sidepj.ithurts.service;
 import com.sidepj.ithurts.controller.dto.ErrorResult;
 import com.sidepj.ithurts.domain.Member;
 import com.sidepj.ithurts.repository.MemberRepository;
-import com.sidepj.ithurts.service.Session.SessionManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
@@ -11,6 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -19,25 +19,24 @@ import java.util.Optional;
 public class LoginService {
 
     private final MemberRepository memberRepository;
-    private final SessionManager sessionManager;
 
-    public void login(String username, String password, HttpServletResponse response){
-        Optional<Member> findMember = memberRepository.findMemberByName(username);
-        if(findMember.isPresent() && findMember.get().getPassword().equals(password)){
+    public void login(String username, String password, HttpServletRequest request, HttpServletResponse response){
+        Optional<Member> findMemberOptional = memberRepository.findMemberByName(username);
+        if(findMemberOptional.isPresent() && findMemberOptional.get().getPassword().equals(password)){
             // TO-DO 패스워드 암/복호화
-            sessionManager.createSession(findMember, response);
+            //sessionManager.createSession(findMember, response);
+            Member loginMember = findMemberOptional.get();
+            HttpSession session = request.getSession();
+            session.setAttribute(SessionConst.LOGIN_MEMBER, loginMember);
         } else {
             throw new NoSuchElementException("아이디 비밀번호를 확인하세요");
         }
     }
 
     public void logout(HttpServletRequest request){
-        sessionManager.expire(request);
-    }
-
-    @ExceptionHandler(IllegalAccessError.class)
-    public ErrorResult loginHandleException(Exception e){
-        return new ErrorResult("EX", "로그인 오류");
+        //sessionManager.expire(request);
+        HttpSession session = request.getSession();
+        session.invalidate();
     }
 
 

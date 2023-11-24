@@ -24,8 +24,8 @@ public class LoginJSONController {
 
     @PostMapping("/login")
     @ResponseBody
-    public String loginJson(@Valid @RequestBody LoginForm form, HttpServletResponse response){
-        loginService.login(form.getUsername(), form.getPassword(), response);
+    public String loginJson(@Valid @RequestBody LoginForm form, HttpServletRequest request ,HttpServletResponse response){
+        loginService.login(form.getUsername(), form.getPassword(), request, response);
         return "ok";
     }
 
