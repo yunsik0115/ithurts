@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -28,7 +29,8 @@ public class MemberSerivceImpl implements MemberService {
 
     @Override
     public MemberControllerDTO getMemberByName(String memberName) {
-        return new MemberControllerDTO(memberRepository.findMemberByName(memberName));
+        Optional<Member> findMember = memberRepository.findMemberByName(memberName);
+        return findMember.map(MemberControllerDTO::new).orElse(null);
     }
 
     @Override
@@ -68,7 +70,14 @@ public class MemberSerivceImpl implements MemberService {
 
     @Override
     public String getRole(String memberName) {
-        return new MemberControllerDTO(memberRepository.findMemberByName(memberName)).getRole();
+        Optional<Member> findMember = memberRepository.findMemberByName(memberName);
+        if(findMember.isPresent()){
+            Member member = findMember.get();
+            return member.getRole();
+        }
+        else{
+            return null;
+        }
     }
 
     @Override
@@ -111,8 +120,8 @@ public class MemberSerivceImpl implements MemberService {
         }
 
 
-        Member memberByName = memberRepository.findMemberByName(memberJoinDTO.getUsername());
-        if(memberByName != null){
+        Optional<Member> memberByName = memberRepository.findMemberByName(memberJoinDTO.getUsername());
+        if(memberByName.isPresent()){
             throw new IllegalArgumentException("이미 동일한 이름의 계정이 존재합니다");
         }
     }
