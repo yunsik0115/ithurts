@@ -18,6 +18,7 @@ public class MemberControllerDTO {
 
 
     public MemberControllerDTO(Member member) {
+        this.id = member.getId();
         this.username = member.getName();
         this.role = member.getRole();
     }

@@ -6,12 +6,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
-public interface ReportRepository extends JpaRepository<Long, Report> {
+public interface ReportRepository extends JpaRepository<Report, Long> {
 
-    Report getReportById(Long id);
-    List<Report> getReports();
+    Optional<Report> findById(Long id);
+
+    List<Report> findAll();
 
     @Query("select r from Report r join Hospital h where h.id = :hospitalId")
     List<Report> getReportByHospitalId(Long hospitalId);
@@ -24,7 +26,7 @@ public interface ReportRepository extends JpaRepository<Long, Report> {
 
     Report save(Report report);
 
-    void removeById(Long id);
+    void removeReportById(Long id);
 
 
 }

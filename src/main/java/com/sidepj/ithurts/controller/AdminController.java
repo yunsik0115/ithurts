@@ -70,7 +70,7 @@ public class AdminController {
 
     @GetMapping("/reports/{reportId}")
     public String getReport(@PathVariable Long reportId, Model model){
-        reportService.getReport(reportId);
+        //reportService.getReport(reportId);
         return "report.html";
     }
 
@@ -82,14 +82,14 @@ public class AdminController {
 
     @PatchMapping("/reports/{reportId}")
     public String modifyingReport(@PathVariable Long reportId){
-        reportService.findById(reportId);
+        //reportService.findById(reportId);
 
         return "report.html";
     }
 
     @DeleteMapping("/reports/{reportId}")
     public String deleteReport(@PathVariable Long reportId){
-        reportService.remove(reportId);
+        //reportService.remove(reportId);
         return "report.html";
     }
 
