@@ -3,6 +3,9 @@ package com.sidepj.ithurts.controller.REST;
 import com.sidepj.ithurts.controller.dto.ErrorResult;
 import com.sidepj.ithurts.controller.dto.LoginForm;
 import com.sidepj.ithurts.service.LoginService;
+import com.sidepj.ithurts.service.MemberService;
+import com.sidepj.ithurts.service.dto.MemberControllerDTO;
+import com.sidepj.ithurts.service.dto.MemberJoinDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -12,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.NoSuchElementException;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,8 +23,9 @@ import java.util.NoSuchElementException;
 public class LoginJSONController {
 
     private final LoginService loginService;
+    private final MemberService memberService;
 
-    @PostMapping("/login")
+    @PostMapping("/")
     @ResponseBody
     public String loginJson(@Valid @RequestBody LoginForm form, HttpServletRequest request ,HttpServletResponse response) throws Exception{
         loginService.login(form.getUsername(), form.getPassword(), request, response);
@@ -34,6 +37,13 @@ public class LoginJSONController {
     public String logoutJson(HttpServletRequest request){
         loginService.logout(request);
         return "OK";
+    }
+
+    @PostMapping("/signup")
+    @ResponseBody
+    public ResponseEntity<MemberControllerDTO> signUp(@RequestBody MemberJoinDTO memberJoinDTO){
+        MemberControllerDTO join = memberService.join(memberJoinDTO, "User");
+        return new ResponseEntity<MemberControllerDTO>(join, HttpStatus.ACCEPTED);
     }
 
 

@@ -23,6 +23,8 @@ public class PostDTO {
 
     private String postType;
 
+    private String author;
+
     private int commentCount;
 
     private int loveCount;
@@ -34,6 +36,7 @@ public class PostDTO {
         this.createdDate = post.getCreatedDate();
         this.commentCount = post.getComments().size();
         this.loveCount = post.getLoves().size();
+        this.author = post.getPostMember().getName();
     }
 
     public PostDTO(String name, String content) {

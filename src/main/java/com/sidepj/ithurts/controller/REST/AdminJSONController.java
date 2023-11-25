@@ -43,14 +43,14 @@ public class AdminJSONController {
     @PatchMapping("/users/{userId}")
     @ResponseBody
     public MemberControllerDTO updateAccountInfo(@PathVariable Long userId, @ModelAttribute MemberControllerDTO memberControllerDTO){
-       return memberService.updateMemberById(userId, memberControllerDTO);
+        return memberService.updateMemberById(userId, memberControllerDTO);
     }
 
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/user/add")
     @ResponseBody
-    public MemberControllerDTO addAccount(@ModelAttribute MemberJoinDTO memberJoinDTO){
+    public MemberControllerDTO addAccount(@RequestBody MemberJoinDTO memberJoinDTO){
         return memberService.join(memberJoinDTO, "User");
     }
 
