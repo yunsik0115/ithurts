@@ -12,7 +12,7 @@ public interface MemberService {
 
     MemberControllerDTO getMemberById(Long id);
 
-    MemberControllerDTO updateMemberById(Long id, MemberControllerDTO memberControllerDTO);
+    MemberControllerDTO updateMemberById(Long id, MemberJoinDTO memberJoinDTO);
 
     String getRole(String memberName);
 

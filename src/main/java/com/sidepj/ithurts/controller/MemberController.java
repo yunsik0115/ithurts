@@ -2,6 +2,7 @@ package com.sidepj.ithurts.controller;
 
 import com.sidepj.ithurts.service.MemberService;
 import com.sidepj.ithurts.service.dto.MemberControllerDTO;
+import com.sidepj.ithurts.service.dto.MemberJoinDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,8 +33,8 @@ public class MemberController {
     }
 
     @PatchMapping("/{memberId}")
-    public String modifyAccountInfo(@PathVariable Long memberId, @ModelAttribute MemberControllerDTO memberControllerDTO, Model model){
-        memberService.updateMemberById(memberId, memberControllerDTO);
+    public String modifyAccountInfo(@PathVariable Long memberId, @ModelAttribute MemberJoinDTO memberJoinDTO, Model model){
+        memberService.updateMemberById(memberId, memberJoinDTO);
         return "myPage.html";
     }
 

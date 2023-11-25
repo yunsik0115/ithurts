@@ -1,9 +1,9 @@
 package com.sidepj.ithurts.controller.REST;
 
-import com.sidepj.ithurts.controller.dto.ErrorResult;
 import com.sidepj.ithurts.controller.dto.LoginForm;
 import com.sidepj.ithurts.service.LoginService;
 import com.sidepj.ithurts.service.MemberService;
+import com.sidepj.ithurts.service.SessionConst;
 import com.sidepj.ithurts.service.dto.MemberControllerDTO;
 import com.sidepj.ithurts.service.dto.MemberJoinDTO;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import java.nio.file.AccessDeniedException;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,9 +30,11 @@ public class LoginJSONController {
     @PostMapping("/")
     @ResponseBody
     public String loginJson(@Valid @RequestBody LoginForm form, HttpServletRequest request ,HttpServletResponse response) throws Exception{
+        isAlreadyLogin(request);
         loginService.login(form.getUsername(), form.getPassword(), request, response);
         return "ok";
     }
+
 
     @PostMapping("/logout")
     @ResponseBody
@@ -41,12 +45,18 @@ public class LoginJSONController {
 
     @PostMapping("/signup")
     @ResponseBody
-    public ResponseEntity<MemberControllerDTO> signUp(@RequestBody MemberJoinDTO memberJoinDTO){
+    public ResponseEntity<MemberControllerDTO> signUp(@RequestBody MemberJoinDTO memberJoinDTO, HttpServletRequest request) throws Exception{
+        isAlreadyLogin(request);
         MemberControllerDTO join = memberService.join(memberJoinDTO, "User");
         return new ResponseEntity<MemberControllerDTO>(join, HttpStatus.ACCEPTED);
     }
 
-
+    private static void isAlreadyLogin(HttpServletRequest request) throws AccessDeniedException {
+        HttpSession httpSession = request.getSession();
+        if(httpSession.getAttribute(SessionConst.LOGIN_MEMBER) != null){
+            throw new AccessDeniedException("이미 로그인 되어있는 회원입니다.");
+        }
+    }
 
     /*
     === API Exception Process ===

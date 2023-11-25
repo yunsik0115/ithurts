@@ -42,8 +42,8 @@ public class AdminJSONController {
     @ResponseStatus(HttpStatus.OK)
     @PatchMapping("/users/{userId}")
     @ResponseBody
-    public MemberControllerDTO updateAccountInfo(@PathVariable Long userId, @ModelAttribute MemberControllerDTO memberControllerDTO){
-        return memberService.updateMemberById(userId, memberControllerDTO);
+    public MemberControllerDTO updateAccountInfo(@PathVariable Long userId, @RequestBody MemberJoinDTO memberJoinDTO){
+        return memberService.updateMemberById(userId, memberJoinDTO);
     }
 
 

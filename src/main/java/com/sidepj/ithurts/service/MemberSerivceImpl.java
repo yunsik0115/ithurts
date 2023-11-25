@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -43,11 +44,18 @@ public class MemberSerivceImpl implements MemberService {
     }
 
     @Override
-    public MemberControllerDTO updateMemberById(Long id, MemberControllerDTO memberControllerDTO) {
+    public MemberControllerDTO updateMemberById(Long id, MemberJoinDTO memberJoinDTO) {
         Optional<Member> findMember = memberRepository.findById(id);
         if(findMember.isPresent()){
             Member member = findMember.get();
-            member.setName(memberControllerDTO.getUsername());
+            if(memberJoinDTO.getUsername() != null && StringUtils.hasText(memberJoinDTO.getUsername())){
+                member.setName(memberJoinDTO.getUsername());
+            }
+
+            if(memberJoinDTO.getPassword() != null && StringUtils.hasText(memberJoinDTO.getPassword())){
+                member.setPassword(memberJoinDTO.getPassword());
+                member.setLastPwdChanged(LocalDateTime.now());
+            }
             return new MemberControllerDTO(member);
         }
         else{

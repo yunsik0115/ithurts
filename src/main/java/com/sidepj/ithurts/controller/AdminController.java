@@ -5,6 +5,7 @@ import com.sidepj.ithurts.service.MemberService;
 import com.sidepj.ithurts.service.PostService;
 import com.sidepj.ithurts.service.dto.HospitalControllerDTO;
 import com.sidepj.ithurts.service.dto.MemberControllerDTO;
+import com.sidepj.ithurts.service.dto.MemberJoinDTO;
 import com.sidepj.ithurts.service.dto.PharmacyControllerDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -37,8 +38,8 @@ public class AdminController {
     }
 
     @PatchMapping("/users/{userId}")
-    public String updateAccountInfo(@PathVariable Long userId, @ModelAttribute MemberControllerDTO memberControllerDTO){
-        memberService.updateMemberById(userId, memberControllerDTO);
+    public String updateAccountInfo(@PathVariable Long userId, @ModelAttribute MemberJoinDTO memberJoinDTO){
+        memberService.updateMemberById(userId, memberJoinDTO);
         return "user.html";
     }
 
