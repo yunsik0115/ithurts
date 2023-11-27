@@ -15,7 +15,6 @@ public class HospitalDTO {// API Parsing용 DTO (DTO -> Entity 변환 메서드 
     private String dutyName; // 약국 이름
     private String dutyAddr; // 주소
     private String dutyTel1; // 대표 전화 1
-    @JsonProperty(namespace = "dutyDivNam")
     private String dutyDivNam; // 병원 분류
 
     // c: 오전 s: 오후 - OPENAPI Spec

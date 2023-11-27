@@ -7,6 +7,7 @@ import com.sidepj.ithurts.service.jsonparsingservice.OpenAPIDataService;
 import com.sidepj.ithurts.service.searchConditions.SearchCondition;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
@@ -120,6 +121,10 @@ public class HospitalService implements DataService<HospitalControllerDTO> {
 
         if(entity.getAddress() != null){
             dto.setAddress(entity.getAddress());
+        }
+
+        if(StringUtils.hasText(entity.getHospitalType())){
+            dto.setHospitalType(entity.getHospitalType());
         }
 
         if(entity.getCoordinates() != null){
