@@ -1,5 +1,6 @@
 package com.sidepj.ithurts.controller;
 
+import com.sidepj.ithurts.service.DataService;
 import com.sidepj.ithurts.service.HospitalService;
 import com.sidepj.ithurts.service.PharmacyService;
 import com.sidepj.ithurts.service.dto.HospitalControllerDTO;
@@ -18,8 +19,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MapController {
 
-    private final HospitalService hospitalService;
-    private final PharmacyService pharmacyService;
+    //private final HospitalService hospitalService;
+    private final DataService<HospitalControllerDTO> hospitalService;
+    //private final PharmacyService pharmacyService;
+    private final DataService<PharmacyControllerDTO> pharmacyService;
 
     @GetMapping("/")
     public String getMap(){
