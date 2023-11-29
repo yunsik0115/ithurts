@@ -124,9 +124,10 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
             Hospital hospital = new Hospital();
             entityInjectionFromDTO(hospitalDTO, hospital);
             officeTimeInjectionFromDTOs(hospitalDTO, hospital);
+            log.trace("{}", hospital);
             hospitalTransferedhospitalList.add(hospital);
         }
-
+        log.trace("=================DTO TO Hospital TRANSFERRATION Finished ==============");
         return hospitalTransferedhospitalList;
     }
 
@@ -142,8 +143,9 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
         if(hospitalDTO.getDutyAddr() != null) {
             hospital.setAddress(hospitalDTO.getDutyAddr());
         }
-        if(hospitalDTO.getDutyDivNam() != null) {
+        if(StringUtils.hasText(hospitalDTO.getDutyDivNam())) {
             hospital.setHospitalType(hospitalDTO.getDutyDivNam());
+            log.trace("hospital Type create = {}", hospital.getHospitalType());
         }
         if(hospitalDTO.getWgs84Lat() != null && hospitalDTO.getWgs84Lon() != null) {
             hospital.setCoordinates(new Point(hospitalDTO.getWgs84Lat(), hospitalDTO.getWgs84Lon()));
@@ -160,6 +162,7 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
         }
         if(!from.getHospitalType().equals(to.getHospitalType())) {
             to.setHospitalType(from.getHospitalType());
+            log.trace("hospital Type update = {}", to.getHospitalType());
         }
         if(!from.getCoordinates().equals(to.getCoordinates())) {
             to.setCoordinates(from.getCoordinates());
