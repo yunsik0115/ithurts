@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -126,17 +127,21 @@ public class OpenAPIPharmacyDataService implements OpenAPIDataService<Pharmacy>{
     }
 
     private List<Pharmacy> save(List<Pharmacy> pharmacyList){
-        List<Pharmacy> all = new ArrayList<>();
+        List<Pharmacy> savedPharmaciesList = new ArrayList<>();
         for (Pharmacy pharmacy : pharmacyList) {
-            if(pharmacyRepository.findPharmacyByNameAndAddress(pharmacy.getName(), pharmacy.getAddress()) != null){
-                Pharmacy pharmacyOnDB = pharmacyRepository.findPharmacyByNameAndAddress(pharmacy.getName(), pharmacy.getAddress());
-                entityUpdateWithEntity(pharmacy, pharmacyOnDB);
-                all.add(pharmacyOnDB);
+            if(pharmacyRepository.findPharmacyByNameAndAddress(pharmacy.getName(), pharmacy.getAddress()) == null){
+                savedPharmaciesList.add(pharmacyRepository.save(pharmacy));
+                pharmacy.setCreatedDate(LocalDateTime.now());
+                pharmacyOfficeTimeRepository.saveAll(pharmacy.getOfficeTimes());
             } else{
-                all.add(pharmacyRepository.save(pharmacy));
+                Pharmacy pharmacyOnDB = pharmacyRepository.findPharmacyByNameAndAddress(
+                        pharmacy.getName(), pharmacy.getAddress()
+                );
+                entityUpdateWithEntity(pharmacy, pharmacyOnDB);
+                savedPharmaciesList.add(pharmacyOnDB);
             }
         }
-        return all;
+        return savedPharmaciesList;
     }
 
 
@@ -147,8 +152,11 @@ public class OpenAPIPharmacyDataService implements OpenAPIDataService<Pharmacy>{
         for (PharmacyDTO pharmacyDTO : pharmacyDTOS) {
             Pharmacy pharmacy = new Pharmacy();
             entityInjectionFromDTO(pharmacyDTO, pharmacy);
+            officeTimeInjectionFromDTOs(pharmacyDTO, pharmacy);
+            log.trace("{}", pharmacy);
             pharmacyTransferedPharmacyList.add(pharmacy);
         }
+        log.trace("================DTO TO PHARMACY TRANSFERRATION FINISHED ==============");
         return pharmacyTransferedPharmacyList;
     }
 

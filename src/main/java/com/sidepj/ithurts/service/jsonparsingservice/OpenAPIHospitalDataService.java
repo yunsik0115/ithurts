@@ -100,20 +100,20 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
     // TO - DO 받아오는게 200건이면 쿼리 200건 나감 //
     // 전체 hospitalList를 받아 온 후, 식별자 비교로 가능한 내용은 dirtychecking을 통해 개선하는 로직 구현 필요 //
     private List<Hospital> save(List<Hospital> hospitalList){
-        List<Hospital> all = new ArrayList<>();
+        List<Hospital> savedHospitalsList = new ArrayList<>();
         for (Hospital hospital : hospitalList) {
             if(hospitalRepository.findHospitalByNameAndAddressAndHospitalType(hospital.getName(), hospital.getAddress(), hospital.getHospitalType()) == null){
-                all.add(hospitalRepository.save(hospital));
+                savedHospitalsList.add(hospitalRepository.save(hospital));
                 hospital.setCreatedDate(LocalDateTime.now());
-                hospitalOfficeTimeRepository.saveAll(hospital.getOfficeTimes());
+                hospitalOfficeTimeRepository.saveAll(hospital.getOfficeTimes()); // Save All Retrieved Office Time
             }
             else{
                 Hospital hospitalOnDB = hospitalRepository.findHospitalByNameAndAddressAndHospitalType(hospital.getName(), hospital.getAddress(), hospital.getHospitalType());
                 entityUpdateWithEntity(hospital, hospitalOnDB);
-                all.add(hospitalOnDB);
+                savedHospitalsList.add(hospitalOnDB);
             }
         }
-        return all;
+        return savedHospitalsList;
     }
 
     // 역할 분리, 이 메서드는 파싱되어진 DTO를 Hospital Entity로 교체하는 작업만 수행함
