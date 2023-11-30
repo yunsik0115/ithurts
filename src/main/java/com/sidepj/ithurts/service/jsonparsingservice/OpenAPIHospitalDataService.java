@@ -219,7 +219,7 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
         //hospitalOfficeTimeRepository.save(thu);
         hospital.addTime(thu);
 
-        HospitalOfficeTime fri = new HospitalOfficeTime("thursday", null, null, hospital);
+        HospitalOfficeTime fri = new HospitalOfficeTime("friday", null, null, hospital);
         if(hospitalDTO.getDutyTime5s() != null && hospitalDTO.getDutyTime5c() != null) {
             LocalTime fridayOPEN = LocalTime.parse(hospitalDTO.getDutyTime5s(), formatter);
             LocalTime fridayCLOSED = LocalTime.parse(hospitalDTO.getDutyTime5c(), formatter);

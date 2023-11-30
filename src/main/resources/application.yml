@@ -20,6 +20,6 @@ logging:
     org.hibernate.sql: info
     org.hibernate.type: info
     root: info
-    com.sidepj.ithurts: trace
+    com.sidepj.ithurts: info
 
 
