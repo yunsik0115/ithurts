@@ -1,5 +1,8 @@
 package com.sidepj.ithurts.controller.REST;
 
+import com.sidepj.ithurts.controller.REST.jsonDTO.MemberJsonResponse;
+import com.sidepj.ithurts.controller.REST.jsonDTO.StatusCode;
+import com.sidepj.ithurts.controller.REST.jsonDTO.data.UserJSON;
 import com.sidepj.ithurts.controller.dto.LoginForm;
 import com.sidepj.ithurts.domain.Member;
 import com.sidepj.ithurts.service.LoginService;
@@ -48,10 +51,11 @@ public class LoginJSONController {
 
     @PostMapping("/signup")
     @ResponseBody
-    public ResponseEntity<MemberControllerDTO> signUp(@RequestBody MemberJoinDTO memberJoinDTO, HttpServletRequest request) throws Exception{
+    public ResponseEntity<MemberJsonResponse> signUp(@RequestBody MemberJoinDTO memberJoinDTO, HttpServletRequest request) throws Exception{
         isAlreadyLogin(request);
         Member user = memberService.join(memberJoinDTO, "User");
-        return new ResponseEntity<MemberControllerDTO>(getMemberControllerDTO(user), HttpStatus.ACCEPTED);
+        UserJSON userJSON = userJSONFromEntity(user);
+        return new ResponseEntity<MemberJsonResponse>(new MemberJsonResponse(StatusCode.OK, "성공 : 로그인 완료", userJSON), HttpStatus.ACCEPTED);
     }
 
     private static void isAlreadyLogin(HttpServletRequest request) throws AccessDeniedException {
@@ -83,26 +87,25 @@ public class LoginJSONController {
 
      */
 
-    private List<MemberControllerDTO> getMemberControllerDTOs(List<Member> allMembers) {
-        List<MemberControllerDTO> allMembersTransferedDTO = new ArrayList<>();
-        for (Member member : allMembers) {
-            allMembersTransferedDTO.add(getMemberControllerDTO(member));
+
+
+    private UserJSON userJSONFromEntity(Member member){
+        UserJSON userJSON = new UserJSON();
+        userJSON.setId(member.getId());
+        userJSON.setName(member.getName());
+        userJSON.setCreatedDate(member.getCreatedDate());
+        if(member.getLastPwdChanged() != null){
+            userJSON.setLastPwdChanged(member.getLastPwdChanged());
         }
-        return allMembersTransferedDTO;
+        userJSON.setRole(member.getRole());
+        return userJSON;
     }
 
-    private MemberControllerDTO getMemberControllerDTO(Member member){
-        return new MemberControllerDTO(member);
-    }
-
-
-    // DTO for admin page
-    private List<MemberJoinDTO> getMemberJoinDTOs(List<Member> allMembers) {
-        List<MemberJoinDTO> allMembersTransferedDTO = new ArrayList<>();
-        for (Member allMember : allMembers) {
-            MemberJoinDTO memberJoinDTO = new MemberJoinDTO(allMember);
-            allMembersTransferedDTO.add(memberJoinDTO);
+    private List<UserJSON> userJSONListFromUserJSON(List<Member> members){
+        List<UserJSON> userJSONList = new ArrayList<>();
+        for (Member member : members) {
+            userJSONList.add(userJSONFromEntity(member));
         }
-        return allMembersTransferedDTO;
+        return userJSONList;
     }
 }

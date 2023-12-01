@@ -2,19 +2,20 @@ package com.sidepj.ithurts.domain;
 
 import com.sidepj.ithurts.service.dto.PostDTO;
 import lombok.AccessLevel;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
+@Entity @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "comments")
 public class Comment {
     @Id
     @Column(name = "comment_id")
-    private int id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "post_id")

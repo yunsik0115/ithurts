@@ -1,7 +1,5 @@
 package com.sidepj.ithurts.domain;
 
-import com.sidepj.ithurts.controller.MemberController;
-import com.sidepj.ithurts.service.dto.MemberControllerDTO;
 import com.sidepj.ithurts.service.dto.PostDTO;
 import lombok.AccessLevel;
 import lombok.Getter;

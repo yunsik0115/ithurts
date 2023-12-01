@@ -11,21 +11,21 @@ import java.util.Optional;
 
 public interface PostService {
 
-    PostDTO savePost(Post post);
+    Post savePost(Post post);
 
-    PostDTO getPost(Long id);
+    Post getPost(Long id);
 
     void removePost(Long id);
 
-    List<PostDTO> getAllPosts();
+    List<Post> getAllPosts();
 
-    List<PostDTO> getPostByName(String name);
+    List<Post> getPostByName(String name);
 
-    List<PostDTO> getPostByMember(String memberName);
+    List<Post> getPostByMember(String memberName);
 
-    List<PostDTO> getPostByContent(String content);
+    List<Post> getPostByContent(String content);
 
-    List<PostDTO> getPostByPostType(String postType);
+    List<Post> getPostByPostType(String postType);
 
 
 
