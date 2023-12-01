@@ -1,9 +1,11 @@
 package com.sidepj.ithurts.controller.REST;
 
+import com.sidepj.ithurts.controller.REST.jsonDTO.MemberJsonResponse;
+import com.sidepj.ithurts.controller.REST.jsonDTO.StatusCode;
+import com.sidepj.ithurts.controller.REST.jsonDTO.data.UserJSON;
 import com.sidepj.ithurts.domain.Member;
 import com.sidepj.ithurts.service.MemberService;
 import com.sidepj.ithurts.service.SessionConst;
-import com.sidepj.ithurts.service.dto.MemberControllerDTO;
 import com.sidepj.ithurts.service.dto.MemberJoinDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,20 +28,22 @@ public class MemberJSONController {
 
     @GetMapping("/{memberId}") // Read
     @ResponseBody
-    public ResponseEntity<MemberControllerDTO> getAccountInfoJson(@PathVariable Long memberId, HttpServletRequest request) throws Exception{
+    public ResponseEntity<MemberJsonResponse> getAccountInfoJson(@PathVariable Long memberId, HttpServletRequest request) throws Exception{
         isAlreadyLoginAndUserValidation(request, memberId);
-        MemberControllerDTO memberById = memberService.getMemberById(memberId);
-        return new ResponseEntity<>(memberById, HttpStatus.OK);
+        Member memberById = memberService.getMemberById(memberId);
+        UserJSON userJSON = userJSONFromEntity(memberById);
+        return new ResponseEntity<>(new MemberJsonResponse(StatusCode.OK, "성공 : 유저 정보 가져오기", userJSON), HttpStatus.OK);
     }
 
     @PatchMapping("/{memberId}")
     @ResponseBody
-    public ResponseEntity<MemberControllerDTO> modifyAccountInfoJson // UPDATE
+    public ResponseEntity<MemberJsonResponse> modifyAccountInfoJson // UPDATE
             (@PathVariable Long memberId, @RequestBody MemberJoinDTO memberJoinDTO,
              HttpServletRequest request, HttpServletResponse response) throws Exception{
         isAlreadyLoginAndUserValidation(request, memberId);
-        MemberControllerDTO changedMember = memberService.updateMemberById(memberId, memberJoinDTO);
-        return new ResponseEntity<>(changedMember, HttpStatus.OK);
+        Member changedMember = memberService.updateMemberById(memberId, memberJoinDTO);
+        UserJSON userJSON = userJSONFromEntity(changedMember);
+        return new ResponseEntity<>(new MemberJsonResponse(StatusCode.OK, "성공 : 유저 정보 업데이트", userJSON), HttpStatus.OK);
     }
 
     @DeleteMapping("/{memberId}") // DELETE
@@ -61,6 +65,18 @@ public class MemberJSONController {
         if(!member.getId().equals(memberId)){
             throw new IllegalAccessException("잘못된 접근입니다");
         }
+    }
+
+    private UserJSON userJSONFromEntity(Member member){
+        UserJSON userJSON = new UserJSON();
+        userJSON.setId(member.getId());
+        userJSON.setName(member.getName());
+        userJSON.setCreatedDate(member.getCreatedDate());
+        if(member.getLastPwdChanged() != null){
+            userJSON.setLastPwdChanged(member.getLastPwdChanged());
+        }
+        userJSON.setRole(member.getRole());
+        return userJSON;
     }
 
 }

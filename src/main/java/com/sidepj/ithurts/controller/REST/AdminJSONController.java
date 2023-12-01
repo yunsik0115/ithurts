@@ -1,5 +1,12 @@
 package com.sidepj.ithurts.controller.REST;
 
+import com.sidepj.ithurts.controller.REST.jsonDTO.MemberJsonResponse;
+import com.sidepj.ithurts.controller.REST.jsonDTO.MembersJsonResponse;
+import com.sidepj.ithurts.controller.REST.jsonDTO.StatusCode;
+import com.sidepj.ithurts.controller.REST.jsonDTO.data.UserJSON;
+import com.sidepj.ithurts.domain.Hospital;
+import com.sidepj.ithurts.domain.Member;
+import com.sidepj.ithurts.domain.Pharmacy;
 import com.sidepj.ithurts.service.DataService;
 import com.sidepj.ithurts.service.MemberService;
 import com.sidepj.ithurts.service.PostService;
@@ -9,9 +16,11 @@ import com.sidepj.ithurts.service.dto.MemberJoinDTO;
 import com.sidepj.ithurts.service.dto.PharmacyControllerDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -21,37 +30,44 @@ public class AdminJSONController {
 
     private final PostService postService;
     private final MemberService memberService;
-    private final DataService<HospitalControllerDTO> hospitalService;
-    private final DataService<PharmacyControllerDTO> pharmacyService;
+    private final DataService<Hospital> hospitalService;
+    private final DataService<Pharmacy> pharmacyService;
 
     // TO - DO 일관성 있는 naming 규칙 적용 필요 user <-> member 불일치 등등
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/users")
-    public List<MemberControllerDTO> getAllAccountInfo(){
-        List<MemberControllerDTO> members = memberService.getMembers();
-        return members;
+    public ResponseEntity<MembersJsonResponse> getAllAccountInfo(){
+        List<Member> members = memberService.getMembers();
+        MembersJsonResponse membersJsonResponse = new MembersJsonResponse(StatusCode.OK, "성공 : 전체 멤버 조회하기", userJSONListFromUserJSON(members));
+        return new ResponseEntity<>(membersJsonResponse, HttpStatus.OK);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/users/{userId}")
-    public MemberControllerDTO getAccountInfo(@PathVariable Long userId){
-        return memberService.getMemberById(userId);
+    public ResponseEntity<MemberJsonResponse> getAccountInfo(@PathVariable Long userId){
+        Member findMember = memberService.getMemberById(userId);
+        MemberJsonResponse memberJsonResponse = new MemberJsonResponse(StatusCode.OK, "성공 : 단건 멤버 조회하기", userJSONFromEntity(findMember));
+        return new ResponseEntity<>(memberJsonResponse, HttpStatus.OK);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @PatchMapping("/users/{userId}")
     @ResponseBody
-    public MemberControllerDTO updateAccountInfo(@PathVariable Long userId, @RequestBody MemberJoinDTO memberJoinDTO){
-        return memberService.updateMemberById(userId, memberJoinDTO);
+    public ResponseEntity<MemberJsonResponse> updateAccountInfo(@PathVariable Long userId, @RequestBody MemberJoinDTO memberJoinDTO){
+        Member updatedMemberById = memberService.updateMemberById(userId, memberJoinDTO);
+        MemberJsonResponse memberJsonResponse = new MemberJsonResponse(StatusCode.OK, "성공 : 해당 회원 업데이트 성공", userJSONFromEntity(updatedMemberById));
+        return new ResponseEntity<>(memberJsonResponse,HttpStatus.OK);
     }
 
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/user/add")
     @ResponseBody
-    public MemberControllerDTO addAccount(@RequestBody MemberJoinDTO memberJoinDTO){
-        return memberService.join(memberJoinDTO, "User");
+    public ResponseEntity<MemberJsonResponse> addAccount(@RequestBody MemberJoinDTO memberJoinDTO){
+        Member user = memberService.join(memberJoinDTO, "User");
+        MemberJsonResponse memberJsonResponse = new MemberJsonResponse(StatusCode.OK, "성공 : 회원 정보를 기반으로 유저 가입", userJSONFromEntity(user));
+        return new ResponseEntity<>(memberJsonResponse, HttpStatus.OK);
     }
 
     // Repository hasn't implemented yet.
@@ -195,4 +211,25 @@ public class AdminJSONController {
         // 관리자만 조회 가능, 외부 조회 불가.
         return "post.html";
     }
+
+    private UserJSON userJSONFromEntity(Member member){
+        UserJSON userJSON = new UserJSON();
+        userJSON.setId(member.getId());
+        userJSON.setName(member.getName());
+        userJSON.setCreatedDate(member.getCreatedDate());
+        if(member.getLastPwdChanged() != null){
+            userJSON.setLastPwdChanged(member.getLastPwdChanged());
+        }
+        userJSON.setRole(member.getRole());
+        return userJSON;
+    }
+
+    private List<UserJSON> userJSONListFromUserJSON(List<Member> members){
+        List<UserJSON> userJSONList = new ArrayList<>();
+        for (Member member : members) {
+            userJSONList.add(userJSONFromEntity(member));
+        }
+        return userJSONList;
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.sidepj.ithurts.controller.REST;
 
 import com.sidepj.ithurts.controller.dto.LoginForm;
+import com.sidepj.ithurts.domain.Member;
 import com.sidepj.ithurts.service.LoginService;
 import com.sidepj.ithurts.service.MemberService;
 import com.sidepj.ithurts.service.SessionConst;
@@ -17,6 +18,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.nio.file.AccessDeniedException;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -47,8 +50,8 @@ public class LoginJSONController {
     @ResponseBody
     public ResponseEntity<MemberControllerDTO> signUp(@RequestBody MemberJoinDTO memberJoinDTO, HttpServletRequest request) throws Exception{
         isAlreadyLogin(request);
-        MemberControllerDTO join = memberService.join(memberJoinDTO, "User");
-        return new ResponseEntity<MemberControllerDTO>(join, HttpStatus.ACCEPTED);
+        Member user = memberService.join(memberJoinDTO, "User");
+        return new ResponseEntity<MemberControllerDTO>(getMemberControllerDTO(user), HttpStatus.ACCEPTED);
     }
 
     private static void isAlreadyLogin(HttpServletRequest request) throws AccessDeniedException {
@@ -79,4 +82,27 @@ public class LoginJSONController {
     }
 
      */
+
+    private List<MemberControllerDTO> getMemberControllerDTOs(List<Member> allMembers) {
+        List<MemberControllerDTO> allMembersTransferedDTO = new ArrayList<>();
+        for (Member member : allMembers) {
+            allMembersTransferedDTO.add(getMemberControllerDTO(member));
+        }
+        return allMembersTransferedDTO;
+    }
+
+    private MemberControllerDTO getMemberControllerDTO(Member member){
+        return new MemberControllerDTO(member);
+    }
+
+
+    // DTO for admin page
+    private List<MemberJoinDTO> getMemberJoinDTOs(List<Member> allMembers) {
+        List<MemberJoinDTO> allMembersTransferedDTO = new ArrayList<>();
+        for (Member allMember : allMembers) {
+            MemberJoinDTO memberJoinDTO = new MemberJoinDTO(allMember);
+            allMembersTransferedDTO.add(memberJoinDTO);
+        }
+        return allMembersTransferedDTO;
+    }
 }

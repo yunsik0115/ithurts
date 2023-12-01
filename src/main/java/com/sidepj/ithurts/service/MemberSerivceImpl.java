@@ -23,31 +23,44 @@ public class MemberSerivceImpl implements MemberService {
     private final MemberRepository memberRepository;
 
     @Override
-    public List<MemberControllerDTO> getMembers() {
+    public List<Member> getMembers() {
         List<Member> allMembers = memberRepository.findAll();
-        return getMemberControllerDTOs(allMembers);
+        return allMembers;
     }
 
     @Override
-    public MemberControllerDTO getMemberByName(String memberName) {
+    public Member getMemberByName(String memberName) {
         Optional<Member> findMember = memberRepository.findMemberByName(memberName);
-        return findMember.map(MemberControllerDTO::new).orElse(null);
+        if(findMember.isPresent()){
+            return findMember.get();
+        }
+        else{
+            throw new IllegalArgumentException("해당 이름을 포함한 회원을 찾을 수 없습니다");
+        }
     }
 
     @Override
-    public MemberControllerDTO getMemberById(Long id) {
-        if(memberRepository.findById(id).isPresent()){
-            Optional<Member> fiindMember = memberRepository.findById(id);
-            return new MemberControllerDTO(fiindMember.get());
+    public Member getMemberById(Long id) {
+
+        Optional<Member> findMember = memberRepository.findById(id);
+        if(findMember.isPresent()) {
+            return findMember.get();
         }
         else throw new IllegalArgumentException("존재하지 않는 회원입니다.");
     }
 
     @Override
-    public MemberControllerDTO updateMemberById(Long id, MemberJoinDTO memberJoinDTO) {
+    public Member updateMemberById(Long id, MemberJoinDTO memberJoinDTO) {
+
+        if(memberJoinDTO.getUsername().isBlank() && memberJoinDTO.getPassword().isBlank()){
+            throw new IllegalArgumentException("두 필드 중 하나는 업데이트해야 합니다");
+        }
+
+
         Optional<Member> findMember = memberRepository.findById(id);
         if(findMember.isPresent()){
             Member member = findMember.get();
+
             if(memberJoinDTO.getUsername() != null && StringUtils.hasText(memberJoinDTO.getUsername())){
                 member.setName(memberJoinDTO.getUsername());
             }
@@ -56,7 +69,7 @@ public class MemberSerivceImpl implements MemberService {
                 member.setPassword(memberJoinDTO.getPassword());
                 member.setLastPwdChanged(LocalDateTime.now());
             }
-            return new MemberControllerDTO(member);
+            return member;
         }
         else{
             throw new IllegalArgumentException("정보를 업데이트 할 수 없습니다 관리자에게 문의하세요");
@@ -65,7 +78,9 @@ public class MemberSerivceImpl implements MemberService {
 
     @Override
     public void deleteAccount(Long id) {
+
         Optional<Member> findMember = memberRepository.findById(id);
+
         if(findMember.isPresent()){
             Member member = findMember.get();
             try {
@@ -89,31 +104,10 @@ public class MemberSerivceImpl implements MemberService {
     }
 
     @Override
-    public MemberControllerDTO join(MemberJoinDTO memberJoinDTO, String userRole) {
+    public Member join(MemberJoinDTO memberJoinDTO, String userRole) {
         checkMemberValidity(memberJoinDTO, userRole);
-        Member savedMember = memberRepository.save(new Member(memberJoinDTO, userRole));
-        return new MemberControllerDTO(savedMember);
+        return memberRepository.save(new Member(memberJoinDTO, userRole));
 
-    }
-
-    private List<MemberControllerDTO> getMemberControllerDTOs(List<Member> allMembers) {
-        List<MemberControllerDTO> allMembersTransferedDTO = new ArrayList<>();
-        for (Member allMember : allMembers) {
-            MemberControllerDTO memberControllerDTO = new MemberControllerDTO(allMember);
-            allMembersTransferedDTO.add(memberControllerDTO);
-        }
-        return allMembersTransferedDTO;
-    }
-
-
-    // DTO for admin page
-    private List<MemberJoinDTO> getMemberJoinDTOs(List<Member> allMembers) {
-        List<MemberJoinDTO> allMembersTransferedDTO = new ArrayList<>();
-        for (Member allMember : allMembers) {
-            MemberJoinDTO memberJoinDTO = new MemberJoinDTO(allMember);
-            allMembersTransferedDTO.add(memberJoinDTO);
-        }
-        return allMembersTransferedDTO;
     }
 
     private void checkMemberValidity(MemberJoinDTO memberJoinDTO, String userRole){

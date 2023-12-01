@@ -1,5 +1,8 @@
 package com.sidepj.ithurts.controller;
 
+import com.sidepj.ithurts.domain.Hospital;
+import com.sidepj.ithurts.domain.Member;
+import com.sidepj.ithurts.domain.Pharmacy;
 import com.sidepj.ithurts.service.DataService;
 import com.sidepj.ithurts.service.MemberService;
 import com.sidepj.ithurts.service.PostService;
@@ -12,6 +15,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Controller
 @RequestMapping("/admin/manage")
 @RequiredArgsConstructor
@@ -19,27 +25,30 @@ public class AdminController {
 
     private final PostService postService;
     private final MemberService memberService;
-    private final DataService<HospitalControllerDTO> hospitalService;
-    private final DataService<PharmacyControllerDTO> pharmacyService;
+    private final DataService<Hospital> hospitalService;
+    private final DataService<Pharmacy> pharmacyService;
 
     // TO - DO 일관성 있는 naming 규칙 적용 필요 user <-> member 불일치 등등
+    // Admin의 경우 전체 접근 / 수정 가능해야하기 때문에 서비스 대신 Repository로 전체 정보 직접 접근
 
     @GetMapping("/users")
     public String getAllAccountInfo(Model model){
-        model.addAttribute("accounts", memberService.getMembers());
+        List<Member> members = memberService.getMembers();
+        model.addAttribute("accounts", getMemberControllerDTOs(members));
         return "users.html";
     }
 
     @GetMapping("/users/{userId}")
     public String getAccountInfo(@PathVariable Long userId, Model model){
-        MemberControllerDTO member = memberService.getMemberById(userId);
-        model.addAttribute("user", member);
+        Member findMember = memberService.getMemberById(userId);
+        model.addAttribute("user", getMemberControllerDTO(findMember));
         return "user.html";
     }
 
     @PatchMapping("/users/{userId}")
-    public String updateAccountInfo(@PathVariable Long userId, @ModelAttribute MemberJoinDTO memberJoinDTO){
-        memberService.updateMemberById(userId, memberJoinDTO);
+    public String updateAccountInfo(@PathVariable Long userId, @ModelAttribute MemberJoinDTO memberJoinDTO, Model model){
+        Member member = memberService.updateMemberById(userId, memberJoinDTO);
+        model.addAttribute("updatedUser", getMemberControllerDTO(member));
         return "user.html";
     }
 
@@ -183,6 +192,29 @@ public class AdminController {
         // 관리자가 삭제한 경우, 관리자에 의해 삭제된 게시물입니다(로 표시)
         // 관리자만 조회 가능, 외부 조회 불가.
         return "post.html";
+    }
+
+    private List<MemberControllerDTO> getMemberControllerDTOs(List<Member> allMembers) {
+        List<MemberControllerDTO> allMembersTransferedDTO = new ArrayList<>();
+        for (Member member : allMembers) {
+            allMembersTransferedDTO.add(getMemberControllerDTO(member));
+        }
+        return allMembersTransferedDTO;
+    }
+
+    private MemberControllerDTO getMemberControllerDTO(Member member){
+        return new MemberControllerDTO(member);
+    }
+
+
+    // DTO for admin page
+    private List<MemberJoinDTO> getMemberJoinDTOs(List<Member> allMembers) {
+        List<MemberJoinDTO> allMembersTransferedDTO = new ArrayList<>();
+        for (Member allMember : allMembers) {
+            MemberJoinDTO memberJoinDTO = new MemberJoinDTO(allMember);
+            allMembersTransferedDTO.add(memberJoinDTO);
+        }
+        return allMembersTransferedDTO;
     }
 
 
