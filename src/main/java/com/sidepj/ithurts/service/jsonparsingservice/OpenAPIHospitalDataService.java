@@ -15,9 +15,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.data.geo.Point;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -148,7 +151,10 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
             log.trace("hospital Type create = {}", hospital.getHospitalType());
         }
         if(hospitalDTO.getWgs84Lat() != null && hospitalDTO.getWgs84Lon() != null) {
-            hospital.setCoordinates(new Point(hospitalDTO.getWgs84Lat(), hospitalDTO.getWgs84Lon()));
+            GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+            Coordinate coordinate = new Coordinate(hospitalDTO.getWgs84Lon(), hospitalDTO.getWgs84Lat());
+            Point point = geometryFactory.createPoint(coordinate);
+            hospital.setCoordinates(point);
         }
         hospital.setCreatedDate(LocalDateTime.now());
     }

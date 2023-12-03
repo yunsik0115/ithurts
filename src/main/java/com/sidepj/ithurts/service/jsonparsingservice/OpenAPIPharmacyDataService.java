@@ -15,9 +15,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.data.geo.Point;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -171,7 +174,10 @@ public class OpenAPIPharmacyDataService implements OpenAPIDataService<Pharmacy>{
             pharmacy.setAddress(pharmacy.getAddress());
         }
         if(pharmacyDTO.getWgs84Lat() != null && pharmacyDTO.getWgs84Lon() != null){
-            pharmacy.setCoordinates(new Point(pharmacyDTO.getWgs84Lat(), pharmacyDTO.getWgs84Lon()));
+            GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+            Coordinate coordinate = new Coordinate(pharmacyDTO.getWgs84Lon(), pharmacyDTO.getWgs84Lat());
+            Point point = geometryFactory.createPoint(coordinate);
+            pharmacy.setCoordinates(point);
         }
     }
 

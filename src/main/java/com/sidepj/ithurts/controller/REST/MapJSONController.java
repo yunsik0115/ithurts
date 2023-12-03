@@ -43,7 +43,7 @@ public class MapJSONController {
     // TO - DO Search Hospital의 경우 유저의 위치를 중심으로 일정 반경 내의 Hospital을 가져온다.
     @ResponseBody
     @GetMapping("/search/hospitals")
-    public ResponseEntity<HospitalJsonResponse> getHospitals(@RequestParam String city, @RequestParam String detailedCity){
+    public ResponseEntity<HospitalJsonResponse> getHospitals(@RequestParam String city, @RequestParam String detailedCity, @RequestParam double radius){
         List<Hospital> hospitals = hospitalService.searchByDetailedCity(city, detailedCity);
         HospitalJsonResponse hospitalJsonResponse = new HospitalJsonResponse(StatusCode.OK, "정상 응답 : 전체 병원 목록 불러오기", createHospitalJsonListFromEntites(hospitals));
         return new ResponseEntity<>(hospitalJsonResponse, HttpStatus.OK);

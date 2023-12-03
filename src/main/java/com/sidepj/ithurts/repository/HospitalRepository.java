@@ -1,9 +1,11 @@
 package com.sidepj.ithurts.repository;
 
 import com.sidepj.ithurts.domain.Hospital;
-import org.springframework.data.geo.Point;
+
+import org.locationtech.jts.geom.Point;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.MultiValueMap;
 
@@ -15,10 +17,12 @@ import java.util.stream.Collectors;
 
 @Repository
 public interface HospitalRepository extends JpaRepository<Hospital, Long> {
+
     public List<Hospital> findByName(String officeName);
 
 
-    //public List<Hospital> findByNameWithRadius(String officeName, Point coordinates);
+    @Query("SELECT h FROM Hospital h WHERE FUNCTION('ST_DISTANCE_SPHERE', h.coordinates, :point) < :distance ")
+    public List<Hospital> findByRadius(@Param("point") Point point , @Param("distance") double distance);
 
     /*
     Spherical Law of Cosines Formula

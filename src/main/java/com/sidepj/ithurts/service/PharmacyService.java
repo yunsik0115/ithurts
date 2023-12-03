@@ -25,6 +25,11 @@ public class PharmacyService implements DataService<Pharmacy> {
     private final OpenAPIDataService<Pharmacy> openAPIPharmacyDataService;
 
     @Override
+    public List<Pharmacy> searchByCoordinateAndRadius(double longitude, double latitude, double radius) {
+        return null;
+    }
+
+    @Override
     public List<Pharmacy> searchByName(String officeName) {
         List<Pharmacy> retrievedFromDB = pharmacyRepository.findByName(officeName);
         if(retrievedFromDB.isEmpty()){

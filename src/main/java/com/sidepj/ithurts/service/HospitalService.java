@@ -7,6 +7,7 @@ import com.sidepj.ithurts.service.dto.jsonparsingdto.HospitalDTO;
 import com.sidepj.ithurts.service.jsonparsingservice.OpenAPIDataService;
 import com.sidepj.ithurts.service.searchConditions.SearchCondition;
 import lombok.RequiredArgsConstructor;
+import org.locationtech.jts.geom.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -23,7 +24,14 @@ public class HospitalService implements DataService<Hospital> {
     private final HospitalRepository hospitalRepository;
     private final OpenAPIDataService<Hospital> openAPIHospitalDataService;
 
-
+    @Override
+    public List<Hospital> searchByCoordinateAndRadius(double longitude, double latitude, double radius) {
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+        Coordinate coordinate = new Coordinate(longitude, latitude);
+        Point point = geometryFactory.createPoint(coordinate);
+        List<Hospital> byRadius = hospitalRepository.findByRadius(point, radius);
+        return byRadius;
+    }
 
     @Override
     public List<Hospital> searchByName(String officeName) {

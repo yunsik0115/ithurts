@@ -17,6 +17,8 @@ public interface DataService<T> {
 
     public List<T> searchByDetailedCity(String cityName, String detailedCity); // 군, 동에 의해 찾기
 
+    public List<T> searchByCoordinateAndRadius(double longitude, double latitude, double radius);
+
     public T findById(Long id);
 
     public List<T> searchByServiceType(String serviceType);  // 병.의원 타입에 의해 찾기

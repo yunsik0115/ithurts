@@ -1,7 +1,7 @@
 package com.sidepj.ithurts.domain;
 
 import lombok.*;
-import org.springframework.data.geo.Point;
+import org.locationtech.jts.geom.Point;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -35,7 +35,7 @@ public class Hospital {
     @OneToMany(mappedBy = "hospital")
     private List<HospitalOfficeTime> officeTimes = new ArrayList<>();
 
-    @Column(name = "hospital_coordinates")
+    @Column(name = "hospital_coordinates", columnDefinition = "GEOMETRY")
     private Point coordinates;
 
     @Column(name = "hospital_updated_date")
