@@ -118,6 +118,8 @@ public class PostJSONController {
         return new ResponseEntity<>(postJsonResponse, HttpStatus.OK);
     }
 
+
+    // TO - DO LikeJsonResponse로 반환
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/post/{postId}/like")
     @ResponseBody
@@ -129,7 +131,7 @@ public class PostJSONController {
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/post/{postId}/like")
     @ResponseBody
-    public ResponseEntity<Love> addLikeOnThisPost(@PathVariable Long postId, HttpServletRequest request) throws Exception{
+    public ResponseEntity<PostJsonResponse> addLikeOnThisPost(@PathVariable Long postId, HttpServletRequest request) throws Exception{
 
         HttpSession httpSession = request.getSession();
         if(httpSession.getAttribute(SessionConst.LOGIN_MEMBER) == null) {
@@ -141,14 +143,15 @@ public class PostJSONController {
         love.setLove_member(member);
         loveService.addLove(postId, love);
 
-        // Member Data Injection (maybe by using cookie? or Session?)
-        // HOW to add entity if we get DTO as (POST) findbyPostID?
-        return new ResponseEntity<>(HttpStatus.OK);
+        Post post = postService.getPost(postId);
+        PostJSON postJSON = postJSONFromEntity(post);
+        PostJsonResponse postJsonResponse = new PostJsonResponse(StatusCode.CREATED, "성공 : 글 좋아요 등록", postJSON);
+        return new ResponseEntity<>(postJsonResponse, HttpStatus.OK);
     }
 
     @DeleteMapping("/post/{postId}/like/{likeId}")
     @ResponseBody
-    public ResponseEntity<Love> deleteLikeOnThisPost(@PathVariable Long postId, @PathVariable Long likeId, HttpServletRequest request) throws Exception{
+    public ResponseEntity<PostJsonResponse> deleteLikeOnThisPost(@PathVariable Long postId, @PathVariable Long likeId, HttpServletRequest request) throws Exception{
 
         HttpSession httpSession = request.getSession();
         if(httpSession.getAttribute(SessionConst.LOGIN_MEMBER) == null) {
@@ -160,9 +163,10 @@ public class PostJSONController {
         love.setLove_member(member);
         loveService.addLove(postId, love);
 
-        // Member Data Injection (maybe by using cookie? or Session?)
-        // HOW to add entity if we get DTO as (POST) findbyPostID?
-        return new ResponseEntity<>(HttpStatus.OK);
+        Post post = postService.getPost(postId);
+        PostJSON postJSON = postJSONFromEntity(post);
+        PostJsonResponse postJsonResponse = new PostJsonResponse(StatusCode.CREATED, "성공 : 글 좋아요 취소", postJSON);
+        return new ResponseEntity<>(postJsonResponse, HttpStatus.OK);
     }
 
     @PostMapping("/post/{postId}/comment")

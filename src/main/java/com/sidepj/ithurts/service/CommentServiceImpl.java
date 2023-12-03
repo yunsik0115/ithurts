@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.nio.file.AccessDeniedException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,12 +37,15 @@ public class CommentServiceImpl implements CommentService{
 
     @Override
     public List<Comment> getCommentsByPost(Long postId) {
-        return commentRepository.findByPostId(postId);
+        Optional<List<Comment>> byPostId = commentRepository.findByPostId(postId);
+        // 빈 배열 반환
+        return byPostId.orElseGet(ArrayList::new);
     }
 
     @Override
     public List<Comment> getCommentsByUser(Long userId) {
-        return commentRepository.findByAuthorId(userId);
+        Optional<List<Comment>> byAuthorId = commentRepository.findByAuthorId(userId);
+        return byAuthorId.orElseGet(ArrayList::new);
     }
 
     @Override

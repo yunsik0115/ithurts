@@ -10,9 +10,9 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Table(name = "loves") @Data
 public class Love {
-    @Id
+    @Id @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "love_id")
-    private int id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name="member_id")
