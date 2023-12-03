@@ -18,6 +18,7 @@ import com.sidepj.ithurts.service.dto.PostDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -37,7 +38,6 @@ public class PostJSONController {
     private final CommentService commentService;
     private final LoveService loveService;
 
-    @ResponseStatus(HttpStatus.OK)
     @GetMapping("/posts")
     @ResponseBody
     public ResponseEntity<PostsJsonResponse> postsJSON() {
@@ -47,7 +47,6 @@ public class PostJSONController {
         return new ResponseEntity<>(postsJsonResponse, HttpStatus.OK);
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @GetMapping("/posts/search")
     @ResponseBody
     public ResponseEntity<PostsJsonResponse> searchPostByNameJSON(@RequestParam(required = false) String name) {
@@ -58,9 +57,8 @@ public class PostJSONController {
     }
 
 
-    @ResponseStatus(HttpStatus.OK)
     @PostMapping("/post")
-    @ResponseBody
+    @ResponseBody // create
     public ResponseEntity<PostJsonResponse> writePostJSON(@RequestBody PostDTO postDTO, HttpServletRequest request) throws Exception{
         HttpSession httpSession = request.getSession();
         if(httpSession.getAttribute(SessionConst.LOGIN_MEMBER) == null) {
@@ -76,9 +74,8 @@ public class PostJSONController {
     }
 
 
-    @ResponseStatus(HttpStatus.OK)
     @GetMapping("/post/{postId}")
-    @ResponseBody
+    @ResponseBody // read
     public ResponseEntity<PostJsonResponse> getPostJSON(@PathVariable Long postId){
         Post post = postService.getPost(postId);
         PostJSON postJSON = postJSONFromEntity(post);
@@ -88,9 +85,16 @@ public class PostJSONController {
         return new ResponseEntity<>(postJsonResponse, HttpStatus.OK);
     }
 
+//    @PatchMapping("/post/{postId}")
+//    @ResponseBody
+//    public ResponseEntity<PostJsonResponse> updatePostJSON(@PathVariable Long postId, @RequestBody PostJSON postJSON){
+//
+//
+//    }
+
 
     @DeleteMapping("/post/{postId}")
-    @ResponseBody
+    @ResponseBody // Delete
     public ResponseEntity<PostJsonResponse> deletePostJson(@PathVariable Long postId, HttpServletRequest request) throws Exception{
 
         HttpSession httpSession = request.getSession();
@@ -132,14 +136,62 @@ public class PostJSONController {
             throw new AccessDeniedException("로그인 한 사용자만 이용할 수 있습니다");
         }
         Member member = (Member) httpSession.getAttribute(SessionConst.LOGIN_MEMBER);
-
+        // 같은 유저가 동일 경로로 요청 2회 들어오는 경우 좋아요 취소로 간주하기 (하지 말자, 좋아요 취소시 나중에 Notification 로직 하나에 같이 들어가야한다)
         Love love = new Love();
         love.setLove_member(member);
         loveService.addLove(postId, love);
 
         // Member Data Injection (maybe by using cookie? or Session?)
         // HOW to add entity if we get DTO as (POST) findbyPostID?
-        return new ResponseEntity<Love>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @DeleteMapping("/post/{postId}/like/{likeId}")
+    @ResponseBody
+    public ResponseEntity<Love> deleteLikeOnThisPost(@PathVariable Long postId, @PathVariable Long likeId, HttpServletRequest request) throws Exception{
+
+        HttpSession httpSession = request.getSession();
+        if(httpSession.getAttribute(SessionConst.LOGIN_MEMBER) == null) {
+            throw new AccessDeniedException("로그인 한 사용자만 이용할 수 있습니다");
+        }
+        Member member = (Member) httpSession.getAttribute(SessionConst.LOGIN_MEMBER);
+        // 같은 유저가 동일 경로로 요청 2회 들어오는 경우 좋아요 취소로 간주하기 (하지 말자, 좋아요 취소시 나중에 Notification 로직 하나에 같이 들어가야한다)
+        Love love = new Love();
+        love.setLove_member(member);
+        loveService.addLove(postId, love);
+
+        // Member Data Injection (maybe by using cookie? or Session?)
+        // HOW to add entity if we get DTO as (POST) findbyPostID?
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/post/{postId}/comment")
+    public ResponseEntity<PostJsonResponse> addCommentOnThisPost(@PathVariable Long postId, @RequestBody CommentJSON commentJSON , HttpServletRequest request) throws Exception{
+        HttpSession httpSession = request.getSession();
+        if(httpSession.getAttribute(SessionConst.LOGIN_MEMBER) == null) {
+            throw new AccessDeniedException("로그인 한 사용자만 이용할 수 있습니다");
+        }
+        Member member = (Member) httpSession.getAttribute(SessionConst.LOGIN_MEMBER);
+        Comment comment = new Comment();
+        comment.setContent(commentJSON.getContent());
+        commentService.saveComment(postId, member.getId(), comment);
+
+        PostJsonResponse postJsonResponse = new PostJsonResponse(StatusCode.CREATED, "성공 : 댓글이 성공적으로 생성되었습니다");
+        return new ResponseEntity<>(postJsonResponse, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/post/{postId}/comment/{commentId}")
+    public ResponseEntity<PostJsonResponse> deleteCommentOnThisPost(@PathVariable Long postId, @PathVariable Long commentId, HttpServletRequest request) throws Exception{
+        HttpSession httpSession = request.getSession();
+        if(httpSession.getAttribute(SessionConst.LOGIN_MEMBER) == null) {
+            throw new AccessDeniedException("로그인 한 사용자만 이용할 수 있습니다");
+        }
+        Member member = (Member) httpSession.getAttribute(SessionConst.LOGIN_MEMBER);
+
+        commentService.deleteComment(member.getId(), commentId);
+
+        PostJsonResponse postJsonResponse = new PostJsonResponse(StatusCode.OK, "성공 : 댓글 삭제에 성공하였습니다");
+        return new ResponseEntity<>(postJsonResponse, HttpStatus.OK);
     }
 
     private PostJSON postJSONFromEntity(Post post){
