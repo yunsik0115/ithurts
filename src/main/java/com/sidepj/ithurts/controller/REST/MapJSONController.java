@@ -1,6 +1,7 @@
 package com.sidepj.ithurts.controller.REST;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sidepj.ithurts.controller.REST.jsonDTO.HospitalJsonResponse;
 import com.sidepj.ithurts.controller.REST.jsonDTO.PharmacyJsonResponse;
 import com.sidepj.ithurts.controller.REST.jsonDTO.StatusCode;
@@ -15,11 +16,17 @@ import com.sidepj.ithurts.repository.ReportRepository;
 import com.sidepj.ithurts.service.DataService;
 import com.sidepj.ithurts.service.dto.HospitalControllerDTO;
 import com.sidepj.ithurts.service.dto.PharmacyControllerDTO;
+import com.sidepj.ithurts.service.naverapiservice.GeoLocationResponse;
+import com.sidepj.ithurts.service.naverapiservice.NaverAPIService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +38,7 @@ public class MapJSONController {
     private final DataService<Hospital> hospitalService;
     private final DataService<Pharmacy> pharmacyService;
     private final ReportRepository reportRepository;
+    private final NaverAPIService naverAPIService;
 
     @ResponseBody
     @PostMapping("/search/retrieveAll")
@@ -43,8 +51,9 @@ public class MapJSONController {
     // TO - DO Search Hospital의 경우 유저의 위치를 중심으로 일정 반경 내의 Hospital을 가져온다.
     @ResponseBody
     @GetMapping("/search/hospitals")
-    public ResponseEntity<HospitalJsonResponse> getHospitals(@RequestParam String city, @RequestParam String detailedCity, @RequestParam double radius){
-        List<Hospital> hospitals = hospitalService.searchByDetailedCity(city, detailedCity);
+    public ResponseEntity<HospitalJsonResponse> getHospitals(HttpServletRequest request, @RequestParam double radius) throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
+        GeoLocationResponse location = naverAPIService.getLocation(request);
+        List<Hospital> hospitals = hospitalService.searchByDetailedCity(location.getGeoLocation().getR1(), location.getGeoLocation().getR2());
         HospitalJsonResponse hospitalJsonResponse = new HospitalJsonResponse(StatusCode.OK, "정상 응답 : 전체 병원 목록 불러오기", createHospitalJsonListFromEntites(hospitals));
         return new ResponseEntity<>(hospitalJsonResponse, HttpStatus.OK);
     }
@@ -73,8 +82,9 @@ public class MapJSONController {
 
     @ResponseBody
     @GetMapping("/search/pharmacies")
-    public ResponseEntity<PharmacyJsonResponse> getPharmacies(@RequestParam String city, @RequestParam String detailedCity){
-        List<Pharmacy> pharmacies = pharmacyService.searchByDetailedCity(city, detailedCity);
+    public ResponseEntity<PharmacyJsonResponse> getPharmacies(@RequestParam String city, @RequestParam String detailedCity, HttpServletRequest request) throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
+        GeoLocationResponse location = naverAPIService.getLocation(request);
+        List<Pharmacy> pharmacies = pharmacyService.searchByDetailedCity(location.getGeoLocation().getR1(), location.getGeoLocation().getR2());
         PharmacyJsonResponse pharmacyJsonResponse = new PharmacyJsonResponse(StatusCode.OK, "정상 응답 : 전체 약국 목록 불러오기", createPharmaciesJSONFromEntities(pharmacies));
         return new ResponseEntity<>(pharmacyJsonResponse, HttpStatus.OK);
     }

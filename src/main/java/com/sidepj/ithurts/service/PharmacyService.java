@@ -32,7 +32,11 @@ public class PharmacyService implements DataService<Pharmacy> {
         GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
         Coordinate coordinate = new Coordinate(longitude, latitude);
         Point point = geometryFactory.createPoint(coordinate);
-        return pharmacyRepository.findByRadius(point, radius);
+        Optional<List<Pharmacy>> pharmaciesByRadius = pharmacyRepository.findByRadius(point, radius);
+        if(pharmaciesByRadius.isEmpty()){
+            throw new IllegalStateException("지역 근방에 약국이 없습니다, 검색 범위를 변경해보세요!");
+        }
+        return pharmaciesByRadius.get();
     }
 
     @Override

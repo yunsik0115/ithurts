@@ -13,6 +13,7 @@ import javax.transaction.Transactional;
 import java.awt.print.Pageable;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
@@ -22,7 +23,7 @@ public interface HospitalRepository extends JpaRepository<Hospital, Long> {
 
 
     @Query("SELECT h FROM Hospital h WHERE FUNCTION('ST_DISTANCE_SPHERE', h.coordinates, :point) < :distance ")
-    public List<Hospital> findByRadius(@Param("point") Point point , @Param("distance") double distance);
+    public Optional<List<Hospital>> findByRadius(@Param("point") Point point , @Param("distance") double distance);
 
     /*
     Spherical Law of Cosines Formula

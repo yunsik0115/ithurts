@@ -29,8 +29,11 @@ public class HospitalService implements DataService<Hospital> {
         GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
         Coordinate coordinate = new Coordinate(longitude, latitude);
         Point point = geometryFactory.createPoint(coordinate);
-        List<Hospital> byRadius = hospitalRepository.findByRadius(point, radius);
-        return byRadius;
+        Optional<List<Hospital>> hospitalsByRadius = hospitalRepository.findByRadius(point, radius);
+        if(hospitalsByRadius.isEmpty()){
+            throw new IllegalStateException("근방 내에 병원이 없습니다. 검색 범위를 변경해보세요!");
+        }
+        return hospitalsByRadius.get();
     }
 
     @Override
