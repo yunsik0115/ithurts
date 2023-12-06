@@ -1,6 +1,7 @@
 package com.sidepj.ithurts.service;
 
 import com.sidepj.ithurts.domain.Hospital;
+import com.sidepj.ithurts.domain.Pharmacy;
 import com.sidepj.ithurts.service.searchConditions.SearchCondition;
 
 import java.util.List;

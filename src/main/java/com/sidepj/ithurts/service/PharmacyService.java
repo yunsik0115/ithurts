@@ -3,14 +3,16 @@ package com.sidepj.ithurts.service;
 import com.sidepj.ithurts.domain.Pharmacy;
 import com.sidepj.ithurts.repository.PharmacyOfficeTimeRepository;
 import com.sidepj.ithurts.repository.PharmacyRepository;
-import com.sidepj.ithurts.service.dto.PharmacyControllerDTO;
 import com.sidepj.ithurts.service.jsonparsingservice.OpenAPIDataService;
 import com.sidepj.ithurts.service.searchConditions.SearchCondition;
 import lombok.RequiredArgsConstructor;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -24,9 +26,13 @@ public class PharmacyService implements DataService<Pharmacy> {
     private final PharmacyOfficeTimeRepository pharmacyOfficeTimeRepository;
     private final OpenAPIDataService<Pharmacy> openAPIPharmacyDataService;
 
+
     @Override
     public List<Pharmacy> searchByCoordinateAndRadius(double longitude, double latitude, double radius) {
-        return null;
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+        Coordinate coordinate = new Coordinate(longitude, latitude);
+        Point point = geometryFactory.createPoint(coordinate);
+        return pharmacyRepository.findByRadius(point, radius);
     }
 
     @Override

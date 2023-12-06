@@ -16,7 +16,6 @@ public interface PharmacyRepository extends JpaRepository<Pharmacy, Long> {
     @Query("SELECT p FROM Pharmacy p WHERE FUNCTION('ST_DISTANCE_SPHERE', p.coordinates, :point) < :distance ")
     public List<Pharmacy> findByRadius(@Param("point") Point point , @Param("distance") double distance);
     public List<Pharmacy> findByName(String name);
-
     public List<Pharmacy> findByAddressContains(String address);
 
     public List<Pharmacy> findAll();
