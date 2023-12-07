@@ -7,7 +7,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.apache.tomcat.util.json.JSONParser;
+import org.json.JSONArray;
 import org.json.JSONObject;
+import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.*;
@@ -19,6 +21,7 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -42,17 +45,38 @@ public class NaverAPIService {
 
     private final ObjectMapper objectMapper;
 
-    private final String testIP = "210.125.183.15";
+    public ResponseEntity<NaverMapAPISearchResult> getNaverMapSearchResult(String searchName, Double lon, Double lat) throws JsonProcessingException {
+        final String hostname = "https://map.naver.com";
+        final String requestUrl = "/p/api/search/instant-search";
 
-    public GeoLocationResponse getLocation(HttpServletRequest request) throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
-        ResponseEntity<GeoLocationResponse> geoLocationResponseEntity = geoLocationRetrieve(request);
-        if(!geoLocationResponseEntity.getStatusCode().equals(HttpStatus.OK)){
-            throw new IllegalStateException("서버에서 위치 정보를 가져오지 못했습니다");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json"));
+
+        final Map<String, List<String>> requestParameters = new HashMap<String, List<String>>();
+        requestParameters.put("query", Arrays.asList(searchName));
+        StringBuilder sb = new StringBuilder(lon.toString());
+        sb.append(",").append(lat.toString());
+        requestParameters.put("coords", Arrays.asList(sb.toString()));
+
+        SortedMap<String, SortedSet<String>> parameters = convertTypeToSortedMap(requestParameters);
+        String baseString = requestUrl + "?" + getRequestQueryString(parameters);
+
+        HttpEntity httpEntity = new HttpEntity(headers);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> exchange = restTemplate.exchange(baseString, HttpMethod.GET, null, String.class);
+        JSONObject jsonObject = objectMapper.readValue(exchange.getBody(), JSONObject.class);
+        if(jsonObject.get("place") != null){
+            JSONArray place = (JSONArray) jsonObject.get("place");
+            JSONObject o = (JSONObject) place.get(0);
+            NaverMapAPISearchResult naverMapAPISearchResult = objectMapper.readValue(o.toString(), NaverMapAPISearchResult.class);
+            log.info("naverMapAPISearchResult = {}", naverMapAPISearchResult);
+            return new ResponseEntity(naverMapAPISearchResult,HttpStatus.OK);
         }
-        return geoLocationResponseEntity.getBody();
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    private ResponseEntity<GeoLocationResponse> geoLocationRetrieve(HttpServletRequest request) throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
+    public ResponseEntity<GeoLocationResponse> geoLocationRetrieve(HttpServletRequest request, String testIP) throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
         final String requestMethod = "GET";
         final String hostName = "https://geolocation.apigw.ntruss.com";
         final String requestUrl= "/geolocation/v2/geoLocation";
@@ -98,6 +122,7 @@ public class NaverAPIService {
 
     private static SortedMap<String, SortedSet<String>> convertTypeToSortedMap(final Map<String, List<String>> requestParameters) {
         final SortedMap<String, SortedSet<String>> significateParameters = new TreeMap<String, SortedSet<String>>();
+
         final Iterator<String> parameterNames = requestParameters.keySet().iterator();
         while (parameterNames.hasNext()) {
             final String parameterName = parameterNames.next();

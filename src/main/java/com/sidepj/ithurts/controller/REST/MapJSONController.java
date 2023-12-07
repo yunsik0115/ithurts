@@ -17,7 +17,7 @@ import com.sidepj.ithurts.service.DataService;
 import com.sidepj.ithurts.service.dto.HospitalControllerDTO;
 import com.sidepj.ithurts.service.dto.PharmacyControllerDTO;
 import com.sidepj.ithurts.service.naverapiservice.GeoLocationResponse;
-import com.sidepj.ithurts.service.naverapiservice.NaverAPIService;
+import com.sidepj.ithurts.service.naverapiservice.NaverAPIUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +38,7 @@ public class MapJSONController {
     private final DataService<Hospital> hospitalService;
     private final DataService<Pharmacy> pharmacyService;
     private final ReportRepository reportRepository;
-    private final NaverAPIService naverAPIService;
+    private final NaverAPIUtils naverAPIUtils;
 
     @ResponseBody
     @PostMapping("/search/retrieveAll")
@@ -52,7 +52,7 @@ public class MapJSONController {
     @ResponseBody
     @GetMapping("/search/hospitals")
     public ResponseEntity<HospitalJsonResponse> getHospitals(HttpServletRequest request, @RequestParam double radius) throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
-        GeoLocationResponse location = naverAPIService.getLocation(request);
+        GeoLocationResponse location = naverAPIUtils.getLocation(request);
         List<Hospital> hospitals = hospitalService.searchByDetailedCity(location.getGeoLocation().getR1(), location.getGeoLocation().getR2());
         HospitalJsonResponse hospitalJsonResponse = new HospitalJsonResponse(StatusCode.OK, "정상 응답 : 전체 병원 목록 불러오기", createHospitalJsonListFromEntites(hospitals));
         return new ResponseEntity<>(hospitalJsonResponse, HttpStatus.OK);
@@ -83,7 +83,7 @@ public class MapJSONController {
     @ResponseBody
     @GetMapping("/search/pharmacies")
     public ResponseEntity<PharmacyJsonResponse> getPharmacies(@RequestParam String city, @RequestParam String detailedCity, HttpServletRequest request) throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
-        GeoLocationResponse location = naverAPIService.getLocation(request);
+        GeoLocationResponse location = naverAPIUtils.getLocation(request);
         List<Pharmacy> pharmacies = pharmacyService.searchByDetailedCity(location.getGeoLocation().getR1(), location.getGeoLocation().getR2());
         PharmacyJsonResponse pharmacyJsonResponse = new PharmacyJsonResponse(StatusCode.OK, "정상 응답 : 전체 약국 목록 불러오기", createPharmaciesJSONFromEntities(pharmacies));
         return new ResponseEntity<>(pharmacyJsonResponse, HttpStatus.OK);
