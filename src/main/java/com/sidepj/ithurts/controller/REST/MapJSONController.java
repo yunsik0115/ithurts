@@ -16,9 +16,13 @@ import com.sidepj.ithurts.repository.ReportRepository;
 import com.sidepj.ithurts.service.DataService;
 import com.sidepj.ithurts.service.dto.HospitalControllerDTO;
 import com.sidepj.ithurts.service.dto.PharmacyControllerDTO;
+import com.sidepj.ithurts.service.naverapiservice.GeoLocation;
 import com.sidepj.ithurts.service.naverapiservice.GeoLocationResponse;
 import com.sidepj.ithurts.service.naverapiservice.NaverAPIUtils;
+import com.sidepj.ithurts.service.naverapiservice.NaverMapAPISearchResult;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.locationtech.jts.geom.Point;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +37,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/json/maps")
 @RequiredArgsConstructor
+@Slf4j
 public class MapJSONController {
 
     private final DataService<Hospital> hospitalService;
@@ -65,6 +70,21 @@ public class MapJSONController {
         HospitalJsonResponse hospitalJsonResponse = new HospitalJsonResponse(StatusCode.OK, "정상 응답 : 단건 병원 불러오기", createHospitalJsonFromEntity(hospital));
         // TO-DO : Exception Handling : Optional 반환하여 예외처리 가능하도록 수정하자.
         return new ResponseEntity<>(hospitalJsonResponse, HttpStatus.OK);
+    }
+
+    @ResponseBody
+    @GetMapping("/search/hospital/{hospitalId}/naver")
+    public ResponseEntity<NaverMapAPISearchResult> getHospitalMetaFromNaver(@PathVariable Long hospitalId,HttpServletRequest request) throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
+        GeoLocationResponse location = naverAPIUtils.getLocation(request);
+        GeoLocation geoLocation = location.getGeoLocation();
+        log.info("geolocation = {}", geoLocation);
+
+        Hospital byId = hospitalService.findById(hospitalId);
+        Point coordinates = byId.getCoordinates();
+        log.info("x = {}", coordinates.getX());
+        log.info("y = {}", coordinates.getY());
+        NaverMapAPISearchResult searchResult = naverAPIUtils.getSearchResult(byId.getName(), coordinates.getY(), coordinates.getX());
+        return new ResponseEntity<>(searchResult, HttpStatus.OK);
     }
 
     @ResponseBody

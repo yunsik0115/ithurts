@@ -59,21 +59,25 @@ public class NaverAPIService {
         requestParameters.put("coords", Arrays.asList(sb.toString()));
 
         SortedMap<String, SortedSet<String>> parameters = convertTypeToSortedMap(requestParameters);
-        String baseString = requestUrl + "?" + getRequestQueryString(parameters);
-
+        final String baseString = hostname + requestUrl + "?" + getRequestQueryString(parameters);
+        log.info("baseString = {}", baseString);
         HttpEntity httpEntity = new HttpEntity(headers);
 
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> exchange = restTemplate.exchange(baseString, HttpMethod.GET, null, String.class);
-        JSONObject jsonObject = objectMapper.readValue(exchange.getBody(), JSONObject.class);
-        if(jsonObject.get("place") != null){
-            JSONArray place = (JSONArray) jsonObject.get("place");
-            JSONObject o = (JSONObject) place.get(0);
-            NaverMapAPISearchResult naverMapAPISearchResult = objectMapper.readValue(o.toString(), NaverMapAPISearchResult.class);
-            log.info("naverMapAPISearchResult = {}", naverMapAPISearchResult);
-            return new ResponseEntity(naverMapAPISearchResult,HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        log.info("exchange = {}", exchange.getBody());
+        Map<String, List<String>> map = objectMapper.readValue(exchange.getBody(), Map.class);
+        log.info("jsonArray = {}", map.get("place").get(0));
+        NaverMapAPISearchResult naverMapAPISearchResult = objectMapper.convertValue(map.get("place").get(0), NaverMapAPISearchResult.class);
+        //NaverMapAPISearchResult naverMapAPISearchResult = objectMapper.readValue(map.get("place").get(0), NaverMapAPISearchResult.class);
+        log.info("napi = {}", naverMapAPISearchResult);
+        //JSONArray place = jsonObject.getJSONArray("meta");
+        //JSONObject o = (JSONObject) place.get(0);
+        //NaverMapAPISearchResult naverMapAPISearchResult = objectMapper.readValue(o.toString(), NaverMapAPISearchResult.class);
+        //log.info("naverMapAPISearchResult = {}", naverMapAPISearchResult);
+            return new ResponseEntity(HttpStatus.OK);
+//        }
+//        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     public ResponseEntity<GeoLocationResponse> geoLocationRetrieve(HttpServletRequest request, String testIP) throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {

@@ -17,7 +17,7 @@ import java.security.NoSuchAlgorithmException;
 @RequiredArgsConstructor
 public class NaverAPIUtils {
 
-    private NaverAPIService naverService;
+    private final NaverAPIService naverService;
 
     private final String testIP = "210.125.183.15";
 
@@ -27,6 +27,10 @@ public class NaverAPIUtils {
             throw new IllegalStateException("서버에서 위치 정보를 가져오지 못했습니다");
         }
         return geoLocationResponseEntity.getBody();
+    }
+
+    public NaverMapAPISearchResult getSearchResult(String searchName, Double lon, Double lat) throws JsonProcessingException {
+        return naverService.getNaverMapSearchResult(searchName, lon, lat).getBody();
     }
 
 }

@@ -1,5 +1,6 @@
 package com.sidepj.ithurts.service.naverapiservice;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
@@ -15,6 +16,7 @@ public class GeoLocation {
 
     private Double lat; // 위도
 
+    @JsonProperty("long")
     private Double lon; // 경도
 
     private String isp; // 통신사
