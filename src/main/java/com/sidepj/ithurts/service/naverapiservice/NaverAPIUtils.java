@@ -30,7 +30,7 @@ public class NaverAPIUtils {
     }
 
     public NaverMapAPISearchResult getSearchResult(String searchName, Double lon, Double lat) throws JsonProcessingException {
-        return naverService.getNaverMapSearchResult(searchName, lon, lat).getBody();
+        return naverService.getSearchResult(searchName, lon, lat);
     }
 
 }

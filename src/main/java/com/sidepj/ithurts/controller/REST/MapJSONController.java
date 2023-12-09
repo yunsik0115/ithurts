@@ -16,10 +16,7 @@ import com.sidepj.ithurts.repository.ReportRepository;
 import com.sidepj.ithurts.service.DataService;
 import com.sidepj.ithurts.service.dto.HospitalControllerDTO;
 import com.sidepj.ithurts.service.dto.PharmacyControllerDTO;
-import com.sidepj.ithurts.service.naverapiservice.GeoLocation;
-import com.sidepj.ithurts.service.naverapiservice.GeoLocationResponse;
-import com.sidepj.ithurts.service.naverapiservice.NaverAPIUtils;
-import com.sidepj.ithurts.service.naverapiservice.NaverMapAPISearchResult;
+import com.sidepj.ithurts.service.naverapiservice.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Point;
@@ -44,6 +41,7 @@ public class MapJSONController {
     private final DataService<Pharmacy> pharmacyService;
     private final ReportRepository reportRepository;
     private final NaverAPIUtils naverAPIUtils;
+    private final NaverAPIService naverAPIService;
 
     @ResponseBody
     @PostMapping("/search/retrieveAll")
@@ -74,7 +72,8 @@ public class MapJSONController {
 
     @ResponseBody
     @GetMapping("/search/hospital/{hospitalId}/naver")
-    public ResponseEntity<NaverMapAPISearchResult> getHospitalMetaFromNaver(@PathVariable Long hospitalId,HttpServletRequest request) throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
+    public ResponseEntity<NaverMapAPISearchResult> getHospitalMetaFromNaver(@PathVariable Long hospitalId,HttpServletRequest request)
+            throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException, InterruptedException {
         GeoLocationResponse location = naverAPIUtils.getLocation(request);
         GeoLocation geoLocation = location.getGeoLocation();
         log.info("geolocation = {}", geoLocation);
@@ -84,6 +83,7 @@ public class MapJSONController {
         log.info("x = {}", coordinates.getX());
         log.info("y = {}", coordinates.getY());
         NaverMapAPISearchResult searchResult = naverAPIUtils.getSearchResult(byId.getName(), coordinates.getY(), coordinates.getX());
+        naverAPIService.getOfficeTime(byId.getName(), coordinates.getY(), coordinates.getX());
         return new ResponseEntity<>(searchResult, HttpStatus.OK);
     }
 
