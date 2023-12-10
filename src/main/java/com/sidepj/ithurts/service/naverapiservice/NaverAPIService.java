@@ -47,57 +47,57 @@ public class NaverAPIService {
     private final ObjectMapper objectMapper;
 
 
-    public Map<String,String> getOfficeTime(String searchName, Double lon, Double lat) throws JsonProcessingException, InterruptedException {
-
-        String WEB_DRIVER_ID = "webdriver.chrome.driver";
-        String WEB_DRIVER_PATH = "src/main/resources/chromedriver";
-
-        System.setProperty(WEB_DRIVER_ID, WEB_DRIVER_PATH);
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--remote-allow-origins=*");
-        options.addArguments("headless");
-
-        WebDriver driver = new ChromeDriver(options);
-
-        NaverMapAPISearchResult naverMapSearchResult = getSearchResult(searchName, lon, lat);
-        final String hostname = "https://pcmap.place.naver.com";
-        final String requestUrl = "/hospital/" + naverMapSearchResult.getSid() +"/home";
-
-        final Map<String, List<String>> requestParameters = new HashMap<String, List<String>>();
-        requestParameters.put("from", Arrays.asList("map"));
-        requestParameters.put("x", Arrays.asList(lon.toString()));
-        requestParameters.put("y", Arrays.asList(lat.toString()));
-        requestParameters.put("timestamp", Arrays.asList(generateTimestamp()));
-
-        SortedMap<String, SortedSet<String>> parameters = convertTypeToSortedMap(requestParameters);
-        final String baseString = hostname + requestUrl + "?" + getRequestQueryString(parameters);
-        log.info("baseString = {}", baseString);
-
-        driver.get(baseString);
-        WebElement button = driver.findElement(By.className("gKP9i"));
-        button.click();
-
-        Thread.sleep(3); // Wait until the button clicked and the info that I want to crawl expanded.
-
-        List<WebElement> w9QyJ = driver.findElements(By.className("w9QyJ"));
-        Map<String, String> hospitalWorkingHours = new HashMap<>();
-
-        // 네이버 크롤링을 위한 클래스 네이밍으로 타고 들어가서 정보 파싱해오기.
-        for (WebElement webElement : w9QyJ) {
-            WebElement element = webElement.findElement(By.className("y6tNq"));
-            WebElement elements = element.findElement(By.className("A_cdD"));
-            List<WebElement> i8cJw = elements.findElements(By.className("i8cJw"));
-            List<WebElement> h3ua4 = elements.findElements(By.className("H3ua4"));
-            if(!i8cJw.isEmpty() && !h3ua4.isEmpty()){
-                hospitalWorkingHours.put(i8cJw.get(0).getText(), h3ua4.get(0).getText());
-                log.info("{} {}", i8cJw.get(0).getText(), h3ua4.get(0).getText());
-            }
-        }
-        // 가독성에 문제가 있음. XPath 사용 고려해보기
-        driver.close();
-        return hospitalWorkingHours;
-
-    }
+//    public Map<String,String> getOfficeTime(String searchName, Double lon, Double lat) throws JsonProcessingException, InterruptedException {
+//
+//        String WEB_DRIVER_ID = "webdriver.chrome.driver";
+//        String WEB_DRIVER_PATH = "src/main/resources/chromedriver";
+//
+//        System.setProperty(WEB_DRIVER_ID, WEB_DRIVER_PATH);
+//        ChromeOptions options = new ChromeOptions();
+//        options.addArguments("--remote-allow-origins=*");
+//        options.addArguments("headless");
+//
+//        WebDriver driver = new ChromeDriver(options);
+//
+//        NaverMapAPISearchResult naverMapSearchResult = getSearchResult(searchName, lon, lat);
+//        final String hostname = "https://pcmap.place.naver.com";
+//        final String requestUrl = "/hospital/" + naverMapSearchResult.getSid() +"/home";
+//
+//        final Map<String, List<String>> requestParameters = new HashMap<String, List<String>>();
+//        requestParameters.put("from", Arrays.asList("map"));
+//        requestParameters.put("x", Arrays.asList(lon.toString()));
+//        requestParameters.put("y", Arrays.asList(lat.toString()));
+//        requestParameters.put("timestamp", Arrays.asList(generateTimestamp()));
+//
+//        SortedMap<String, SortedSet<String>> parameters = convertTypeToSortedMap(requestParameters);
+//        final String baseString = hostname + requestUrl + "?" + getRequestQueryString(parameters);
+//        log.info("baseString = {}", baseString);
+//
+//        driver.get(baseString);
+//        WebElement button = driver.findElement(By.className("gKP9i"));
+//        button.click();
+//
+//        Thread.sleep(3); // Wait until the button clicked and the info that I want to crawl expanded.
+//
+//        List<WebElement> w9QyJ = driver.findElements(By.className("w9QyJ"));
+//        Map<String, String> hospitalWorkingHours = new HashMap<>();
+//
+//        // 네이버 크롤링을 위한 클래스 네이밍으로 타고 들어가서 정보 파싱해오기.
+//        for (WebElement webElement : w9QyJ) {
+//            WebElement element = webElement.findElement(By.className("y6tNq"));
+//            WebElement elements = element.findElement(By.className("A_cdD"));
+//            List<WebElement> i8cJw = elements.findElements(By.className("i8cJw"));
+//            List<WebElement> h3ua4 = elements.findElements(By.className("H3ua4"));
+//            if(!i8cJw.isEmpty() && !h3ua4.isEmpty()){
+//                hospitalWorkingHours.put(i8cJw.get(0).getText(), h3ua4.get(0).getText());
+//                log.info("{} {}", i8cJw.get(0).getText(), h3ua4.get(0).getText());
+//            }
+//        }
+//        // 가독성에 문제가 있음. XPath 사용 고려해보기
+//        driver.close();
+//        return hospitalWorkingHours;
+//
+//    }
 
     public NaverMapAPISearchResult getSearchResult(String searchName, Double lon, Double lat) throws JsonProcessingException {
         final String hostname = "https://map.naver.com";
