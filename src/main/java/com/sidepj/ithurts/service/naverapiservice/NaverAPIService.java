@@ -122,6 +122,7 @@ public class NaverAPIService {
         Map<String, List<String>> map = objectMapper.readValue(exchange.getBody(), Map.class);
         log.info("jsonArray = {}", map.get("place").get(0));
         return objectMapper.convertValue(map.get("place").get(0), NaverMapAPISearchResult.class);
+
         //NaverMapAPISearchResult naverMapAPISearchResult = objectMapper.readValue(map.get("place").get(0), NaverMapAPISearchResult.class);
         //log.info("napi = {}", naverMapAPISearchResult);
         //JSONArray place = jsonObject.getJSONArray("meta");

@@ -12,8 +12,6 @@ import java.net.URL;
 @ToString
 public class NaverMapAPISearchResult {
 
-    private String id;
-
     private String title;
 
     private String sid;

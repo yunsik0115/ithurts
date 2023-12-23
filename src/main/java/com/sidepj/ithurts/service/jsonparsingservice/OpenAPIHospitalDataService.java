@@ -101,7 +101,7 @@ public class OpenAPIHospitalDataService implements OpenAPIDataService<Hospital> 
     // 기존에 데이터가 없는 경우 HospitalRepository를 사용하여 em.persist 수행.
 
     // TO - DO 받아오는게 200건이면 쿼리 200건 나감 //
-    // 전체 hospitalList를 받아 온 후, 식별자 비교로 가능한 내용은 dirtychecking을 통해 개선하는 로직 구현 필요 //
+    // 전체 hospitalList를 받아 온 후, 식별자 비교로 가능한 내용은 dirty checking을 통해 개선하는 로직 구현 필요 //
     private List<Hospital> save(List<Hospital> hospitalList){
         List<Hospital> savedHospitalsList = new ArrayList<>();
         for (Hospital hospital : hospitalList) {

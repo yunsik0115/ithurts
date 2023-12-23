@@ -89,7 +89,7 @@ public class MapJSONController {
         URL locationMetaInfoURL = getLocationMetaInfoURL(searchResult.getSid());
 
         //naverAPIService.getOfficeTime(byId.getName(), coordinates.getY(), coordinates.getX());
-        return new ResponseEntity<>(new NaverMapAPISearchResponse(searchResult, locationMetaInfoURL), HttpStatus.OK);
+        return new ResponseEntity<>(new NaverMapAPISearchResponse(StatusCode.OK, "정상 응답 : 성공적으로 네이버 URL을 가져왔습니다",searchResult, locationMetaInfoURL), HttpStatus.OK);
     }
 
     @ResponseBody

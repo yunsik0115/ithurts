@@ -10,6 +10,10 @@ import java.net.URL;
 @AllArgsConstructor
 public class NaverMapAPISearchResponse {
 
+    private int status;
+
+    private String message;
+
     private NaverMapAPISearchResult nvr;
     private URL url;
 
