@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
@@ -32,5 +34,7 @@ public class NaverAPIUtils {
     public NaverMapAPISearchResult getSearchResult(String searchName, Double lon, Double lat) throws JsonProcessingException {
         return naverService.getSearchResult(searchName, lon, lat);
     }
+
+
 
 }

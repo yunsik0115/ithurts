@@ -3,6 +3,7 @@ package com.sidepj.ithurts.controller.REST;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sidepj.ithurts.controller.REST.jsonDTO.HospitalJsonResponse;
+import com.sidepj.ithurts.controller.REST.jsonDTO.NaverMapAPISearchResponse;
 import com.sidepj.ithurts.controller.REST.jsonDTO.PharmacyJsonResponse;
 import com.sidepj.ithurts.controller.REST.jsonDTO.StatusCode;
 import com.sidepj.ithurts.controller.REST.jsonDTO.data.HospitalJSON;
@@ -26,6 +27,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -72,8 +75,8 @@ public class MapJSONController {
 
     @ResponseBody
     @GetMapping("/search/hospital/{hospitalId}/naver")
-    public ResponseEntity<NaverMapAPISearchResult> getHospitalMetaFromNaver(@PathVariable Long hospitalId,HttpServletRequest request)
-            throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException, InterruptedException {
+    public ResponseEntity<NaverMapAPISearchResponse> getHospitalMetaFromNaver(@PathVariable Long hospitalId, HttpServletRequest request)
+            throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException, InterruptedException, MalformedURLException {
         GeoLocationResponse location = naverAPIUtils.getLocation(request);
         GeoLocation geoLocation = location.getGeoLocation();
         log.info("geolocation = {}", geoLocation);
@@ -83,8 +86,10 @@ public class MapJSONController {
         log.info("x = {}", coordinates.getX());
         log.info("y = {}", coordinates.getY());
         NaverMapAPISearchResult searchResult = naverAPIUtils.getSearchResult(byId.getName(), coordinates.getY(), coordinates.getX());
-        naverAPIService.getOfficeTime(byId.getName(), coordinates.getY(), coordinates.getX());
-        return new ResponseEntity<>(searchResult, HttpStatus.OK);
+        URL locationMetaInfoURL = getLocationMetaInfoURL(searchResult.getSid());
+
+        //naverAPIService.getOfficeTime(byId.getName(), coordinates.getY(), coordinates.getX());
+        return new ResponseEntity<>(new NaverMapAPISearchResponse(searchResult, locationMetaInfoURL), HttpStatus.OK);
     }
 
     @ResponseBody
@@ -239,6 +244,12 @@ public class MapJSONController {
                 pharmacyJSON.setHolidayClosed(officeTime.getEndOffice());
             }
         }
+    }
+
+    private URL getLocationMetaInfoURL(String sid) throws MalformedURLException {
+        final String hostname = "https://pcmap.place.naver.com";
+        final String requestUrl = "/hospital/" + sid +"/home";
+        return new URL(hostname + requestUrl);
     }
 
 
