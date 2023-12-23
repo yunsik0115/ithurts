@@ -1,14 +1,17 @@
 package com.sidepj.ithurts.service;
 
+import com.google.common.hash.Hashing;
 import com.sidepj.ithurts.domain.Member;
 import com.sidepj.ithurts.repository.MemberRepository;
 import com.sidepj.ithurts.service.dto.MemberControllerDTO;
 import com.sidepj.ithurts.service.dto.MemberJoinDTO;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.transaction.Transactional;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +21,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class MemberSerivceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
@@ -105,9 +109,11 @@ public class MemberSerivceImpl implements MemberService {
 
     @Override
     public Member join(MemberJoinDTO memberJoinDTO, String userRole) {
+        String encPwd = Hashing.sha256().hashString(memberJoinDTO.getPassword(), StandardCharsets.UTF_8).toString();
+        log.info("encrypted password = {}", encPwd);
+        memberJoinDTO.setPassword(encPwd);
         checkMemberValidity(memberJoinDTO, userRole);
         return memberRepository.save(new Member(memberJoinDTO, userRole));
-
     }
 
     private void checkMemberValidity(MemberJoinDTO memberJoinDTO, String userRole){
