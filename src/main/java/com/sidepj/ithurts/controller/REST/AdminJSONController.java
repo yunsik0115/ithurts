@@ -5,6 +5,7 @@ import com.sidepj.ithurts.controller.REST.jsonDTO.MembersJsonResponse;
 import com.sidepj.ithurts.controller.REST.jsonDTO.StatusCode;
 import com.sidepj.ithurts.controller.REST.jsonDTO.data.UserJSON;
 import com.sidepj.ithurts.controller.dto.ReportDTO;
+import com.sidepj.ithurts.controller.dto.ReportDTOForAdmin;
 import com.sidepj.ithurts.domain.Hospital;
 import com.sidepj.ithurts.domain.Member;
 import com.sidepj.ithurts.domain.Pharmacy;
@@ -17,7 +18,6 @@ import com.sidepj.ithurts.service.dto.MemberJoinDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -93,16 +93,17 @@ public class AdminJSONController {
 //    }
 
     @GetMapping("/reports")
-    public ResponseEntity<List<ReportDTO>> reports(){
+    public ResponseEntity<List<ReportDTOForAdmin>> reports(){
         List<Report> reports = reportService.getReports();
-        List<ReportDTO> reportDTOS = entityListFromReportDTOS(reports);
+        List<ReportDTOForAdmin> reportDTOS = dtoListFromEntities(reports);
         return new ResponseEntity<>(reportDTOS, HttpStatus.OK);
     }
 
     @GetMapping("/reports/{reportId}")
-    public String getReport(@PathVariable Long reportId, Model model){
-        //reportService.getReport(reportId);
-        return "report.html";
+    public ResponseEntity<ReportDTOForAdmin> getReport(@PathVariable Long reportId){
+        Report report = reportService.getReport(reportId);
+        ReportDTOForAdmin reportDTOForAdmin = getReportDTOForAdmin(reportId);
+        return new ResponseEntity<>(reportDTOForAdmin, HttpStatus.OK);
     }
 
 //    @PostMapping("/reports/{reportId}")
@@ -112,11 +113,16 @@ public class AdminJSONController {
 //    }
 
     @PatchMapping("/reports/{reportId}")
-    public String modifyingReport(@PathVariable Long reportId){
-        //reportService.findById(reportId);
+    public ResponseEntity<ReportDTOForAdmin> modifyingReport(@PathVariable Long reportId, @RequestParam Boolean status) throws IllegalAccessException {
 
-        return "report.html";
+        Report report = reportService.checkStatus(reportId, status);
+
+        ReportDTOForAdmin reportDTO = reportDTOFromEntity(report);
+
+        return new ResponseEntity<>(reportDTO, HttpStatus.OK);
     }
+
+
 
     @DeleteMapping("/reports/{reportId}")
     public String deleteReport(@PathVariable Long reportId){
@@ -235,22 +241,25 @@ public class AdminJSONController {
         return userJSONList;
     }
 
-    private List<ReportDTO> entityListFromReportDTOS(List<Report> reports){
-        List<ReportDTO> list = new ArrayList<>();
+    private List<ReportDTOForAdmin> dtoListFromEntities(List<Report> reports){
+        List<ReportDTOForAdmin> list = new ArrayList<>();
         for (Report report : reports) {
-            ReportDTO reportDTO = entityFromReportDTO(report);
+            ReportDTOForAdmin reportDTO = reportDTOFromEntity(report);
             list.add(reportDTO);
         }
         return list;
     }
 
-    private ReportDTO entityFromReportDTO(Report report){
-        ReportDTO reportDTO = new ReportDTO();
+    private ReportDTOForAdmin reportDTOFromEntity(Report report){
+        ReportDTOForAdmin reportDTO = new ReportDTOForAdmin();
+        reportDTO.setId(report.getId());
         reportDTO.setName(report.getName());
         reportDTO.setContent(report.getComment());
         reportDTO.setCreatedAt(report.getCreatedDate());
-        reportDTO.setTargetId(report.getPharmHospId());
+        reportDTO.setPharmHospId(report.getPharmHospId());
         reportDTO.setReportType(report.getReportType());
+        reportDTO.setIsChecked(report.getIsChecked());
+        reportDTO.setAuthor(report.getReport_member().getName()); // 최적화 여지 생각해보기
         if(report.getModifiedAt() != null)
             reportDTO.setModifiedAt(report.getModifiedAt());
         try{
@@ -264,6 +273,35 @@ public class AdminJSONController {
 
         }
         return reportDTO;
+    }
+
+    private ReportDTOForAdmin getReportDTOForAdmin(Long reportId) {
+        Report report = reportService.getReport(reportId);
+
+        ReportDTOForAdmin reportDTOForAdmin = new ReportDTOForAdmin();
+        reportDTOForAdmin.setName(report.getName());
+        reportDTOForAdmin.setContent(report.getComment());
+        reportDTOForAdmin.setCreatedAt(report.getCreatedDate());
+        reportDTOForAdmin.setReportType(report.getReportType());
+        reportDTOForAdmin.setIsChecked(report.getIsChecked());
+        reportDTOForAdmin.setAuthor(report.getReport_member().getName()); // 최적화 여지 생각해보기
+        if(report.getModifiedAt() != null)
+            reportDTOForAdmin.setModifiedAt(report.getModifiedAt());
+        reportDTOForAdmin.setIsChecked(report.getIsChecked());
+
+        try{
+            reportDTOForAdmin.setTargetName(hospitalService.findById(report.getPharmHospId()).getName());
+        } catch (Exception ignored){
+
+        }
+        try{
+            reportDTOForAdmin.setTargetName(pharmacyService.findById(report.getPharmHospId()).getName());
+        } catch (Exception ignored){
+
+        }
+
+        reportDTOForAdmin.setPharmHospId(report.getPharmHospId());
+        return reportDTOForAdmin;
     }
 
 }

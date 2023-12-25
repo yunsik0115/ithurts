@@ -39,7 +39,7 @@ public class ReportService {
         Report report = new Report();
         report.setReport_member(byId.get());
         report.setName(reportDTO.getName());
-        report.setPharmHospId(reportDTO.getTargetId());
+        report.setPharmHospId(reportDTO.getPharmHospId());
         report.setReportType(reportDTO.getReportType());
         report.setComment(reportDTO.getContent());
         report.setCreatedDate(LocalDateTime.now());
@@ -84,8 +84,25 @@ public class ReportService {
         }
 
         Report report = byId.get();
-        report.setComment(report.getComment());
+        report.setName(reportDTO.getName());
+        report.setComment(reportDTO.getContent());
         report.setModifiedAt(LocalDateTime.now());
         return report;
     }
+
+    public Report checkStatus(Long id, Boolean status) throws IllegalAccessException {
+        Optional<Report> byId = reportRepository.findById(id);
+        if(byId.isEmpty()){
+            throw new IllegalAccessException("해당 report를 찾을 수 없습니다");
+        }
+
+        Report report = byId.get();
+        if(status) {
+            report.setIsChecked(true);
+        } else{
+            report.setIsChecked(false);
+        }
+        return report;
+    }
+
 }

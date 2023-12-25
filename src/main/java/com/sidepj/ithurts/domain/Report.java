@@ -10,7 +10,6 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@NoArgsConstructor
 @Table(name="reports")
 @Getter
 @Setter
@@ -31,6 +30,8 @@ public class Report {
 
     private String reportType;
 
+    private Boolean isChecked;
+
     @Column(name = "report_created_date")
     private LocalDateTime createdDate;
 
@@ -39,4 +40,7 @@ public class Report {
 
     private LocalDateTime modifiedAt;
 
+    public Report() {
+        this.isChecked = false;
+    }
 }

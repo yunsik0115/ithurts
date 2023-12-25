@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReportDTO {
+public class ReportDTOForAdmin {
 
     private Long id;
 
@@ -30,6 +30,9 @@ public class ReportDTO {
     private Boolean isChecked;
 
     private LocalDateTime createdAt;
+
     private LocalDateTime modifiedAt;
+
+    private String author;
 
 }
