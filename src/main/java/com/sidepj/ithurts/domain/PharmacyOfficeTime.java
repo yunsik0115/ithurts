@@ -1,5 +1,6 @@
 package com.sidepj.ithurts.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,7 +16,7 @@ public class PharmacyOfficeTime {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne @JsonIgnore
     private Pharmacy pharmacy;
 
     private String weekday;

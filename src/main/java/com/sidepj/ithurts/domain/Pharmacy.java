@@ -1,5 +1,6 @@
 package com.sidepj.ithurts.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.locationtech.jts.geom.Point;
 
@@ -44,8 +45,8 @@ public class Pharmacy {
 
     // private boolean is_available; 서비스 단에서 처리
 
-    @OneToMany(mappedBy = "pharmacy")
-    private List<Report> reports = new ArrayList<>();
+//    @OneToMany(mappedBy = "pharmacy") 특정 Pharmacy에 대한 정보를 따로 볼 필요가 있을까?
+//    private List<Report> reports = new ArrayList<>();
 
     public void addTime(PharmacyOfficeTime pharmacyOfficeTime){
         this.officeTimes.add(pharmacyOfficeTime);

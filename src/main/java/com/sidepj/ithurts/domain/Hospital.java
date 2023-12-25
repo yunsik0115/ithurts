@@ -1,5 +1,6 @@
 package com.sidepj.ithurts.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.locationtech.jts.geom.Point;
 
@@ -47,8 +48,8 @@ public class Hospital {
 
     // private boolean is_available; 서비스단에서 처리
 
-    @OneToMany(mappedBy = "hospital")
-    private List<Report> reports = new ArrayList<>();
+//    @OneToMany(mappedBy = "hospital") 특정 병원에 대한 Report 정보를 매핑할 필요가 있을까?
+//    private List<Report> reports = new ArrayList<>();
 
     public void addTime(HospitalOfficeTime hospitalOfficeTime){
         this.officeTimes.add(hospitalOfficeTime);

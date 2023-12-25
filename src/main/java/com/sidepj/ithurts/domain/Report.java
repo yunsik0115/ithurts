@@ -1,5 +1,6 @@
 package com.sidepj.ithurts.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,7 +10,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @Table(name="reports")
 @Getter
 @Setter
@@ -19,19 +20,16 @@ public class Report {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    private String name;
 
-    @ManyToOne
+    @ManyToOne @JsonIgnore
     @JoinColumn(name = "member_id")
     private Member report_member;// FK for user who created this report.
 
 
-    @ManyToOne
-    @JoinColumn(name = "pharmacy_id")
-    private Pharmacy pharmacy;
+    private Long pharmHospId;
 
-    @ManyToOne
-    @JoinColumn(name = "hospital_id")
-    private Hospital hospital; // FK for which hospital's data is wrong.
+    private String reportType;
 
     @Column(name = "report_created_date")
     private LocalDateTime createdDate;
@@ -39,5 +37,6 @@ public class Report {
     @Column(name = "report_comment")
     private String comment; // reason which will be entered by users.
 
+    private LocalDateTime modifiedAt;
 
 }

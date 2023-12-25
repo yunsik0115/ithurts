@@ -1,5 +1,6 @@
 package com.sidepj.ithurts.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -16,7 +17,7 @@ public class HospitalOfficeTime {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne @JsonIgnore
     private Hospital hospital;
 
     private String weekday;

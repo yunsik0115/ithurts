@@ -8,13 +8,12 @@ import com.sidepj.ithurts.controller.REST.jsonDTO.PharmacyJsonResponse;
 import com.sidepj.ithurts.controller.REST.jsonDTO.StatusCode;
 import com.sidepj.ithurts.controller.REST.jsonDTO.data.HospitalJSON;
 import com.sidepj.ithurts.controller.REST.jsonDTO.data.PharmacyJSON;
-import com.sidepj.ithurts.controller.dto.ReportForm;
-import com.sidepj.ithurts.domain.Hospital;
-import com.sidepj.ithurts.domain.HospitalOfficeTime;
-import com.sidepj.ithurts.domain.Pharmacy;
-import com.sidepj.ithurts.domain.PharmacyOfficeTime;
+import com.sidepj.ithurts.controller.dto.ReportDTO;
+import com.sidepj.ithurts.domain.*;
 import com.sidepj.ithurts.repository.ReportRepository;
 import com.sidepj.ithurts.service.DataService;
+import com.sidepj.ithurts.service.ReportService;
+import com.sidepj.ithurts.service.SessionConst;
 import com.sidepj.ithurts.service.dto.HospitalControllerDTO;
 import com.sidepj.ithurts.service.dto.PharmacyControllerDTO;
 import com.sidepj.ithurts.service.naverapiservice.*;
@@ -26,9 +25,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.AccessDeniedException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ public class MapJSONController {
 
     private final DataService<Hospital> hospitalService;
     private final DataService<Pharmacy> pharmacyService;
-    private final ReportRepository reportRepository;
+    private final ReportService reportService;
     private final NaverAPIUtils naverAPIUtils;
     private final NaverAPIService naverAPIService;
 
@@ -100,8 +101,14 @@ public class MapJSONController {
 
     @ResponseBody
     @PostMapping("/search/hospital/{hospitalId}/report")
-    public ResponseEntity<HospitalControllerDTO> reportHospital(@PathVariable Long hospitalId, @RequestBody ReportForm reportForm){ // @RequestBody List<Long> hospitalIds
+    public ResponseEntity<ReportDTO> reportHospital(@PathVariable Long hospitalId, @RequestBody ReportDTO reportDTO, HttpServletRequest request) throws AccessDeniedException, IllegalAccessException { // @RequestBody List<Long> hospitalIds
+        HttpSession httpSession = request.getSession();
+        if(httpSession.getAttribute(SessionConst.LOGIN_MEMBER) == null){
+            throw new AccessDeniedException("로그인이 필요합니다");
+        }
 
+        Member member = (Member) httpSession.getAttribute(SessionConst.LOGIN_MEMBER);
+        reportService.save(reportDTO, member.getId(), hospitalId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -124,17 +131,15 @@ public class MapJSONController {
 
     @ResponseBody
     @PostMapping("/search/pharmacy/{pharmacyId}/report")
-    public ResponseEntity<PharmacyControllerDTO> reportPharamcy(@PathVariable Long pharmacyId, @RequestBody ReportForm reportForm){
-        //Report report = new Report();
-//        if(reportForm.getReportType().equals("hospital")){
-//
-//        }
-//        else if(reportForm.getReportType().equals("pharmacy")){
-//
-//        } else{
-//            throw new IllegalArgumentException("신고 대상이 조회되지 않습니다, 관리자에게 문의하세요");
-//        }
-        return  new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<PharmacyControllerDTO> reportPharamcy(@PathVariable Long pharmacyId, @RequestBody ReportDTO reportDTO, HttpServletRequest request) throws AccessDeniedException, IllegalAccessException {
+        HttpSession httpSession = request.getSession();
+        if(httpSession.getAttribute(SessionConst.LOGIN_MEMBER) == null){
+            throw new AccessDeniedException("로그인이 필요합니다");
+        }
+
+        Member member = (Member) httpSession.getAttribute(SessionConst.LOGIN_MEMBER);
+        reportService.save(reportDTO, member.getId(), pharmacyId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     private HospitalJSON createHospitalJsonFromEntity(Hospital hospital){

@@ -4,16 +4,16 @@ import com.sidepj.ithurts.controller.REST.jsonDTO.MemberJsonResponse;
 import com.sidepj.ithurts.controller.REST.jsonDTO.MembersJsonResponse;
 import com.sidepj.ithurts.controller.REST.jsonDTO.StatusCode;
 import com.sidepj.ithurts.controller.REST.jsonDTO.data.UserJSON;
+import com.sidepj.ithurts.controller.dto.ReportDTO;
 import com.sidepj.ithurts.domain.Hospital;
 import com.sidepj.ithurts.domain.Member;
 import com.sidepj.ithurts.domain.Pharmacy;
+import com.sidepj.ithurts.domain.Report;
 import com.sidepj.ithurts.service.DataService;
 import com.sidepj.ithurts.service.MemberService;
 import com.sidepj.ithurts.service.PostService;
-import com.sidepj.ithurts.service.dto.HospitalControllerDTO;
-import com.sidepj.ithurts.service.dto.MemberControllerDTO;
+import com.sidepj.ithurts.service.ReportService;
 import com.sidepj.ithurts.service.dto.MemberJoinDTO;
-import com.sidepj.ithurts.service.dto.PharmacyControllerDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +30,7 @@ public class AdminJSONController {
 
     private final PostService postService;
     private final MemberService memberService;
+    private final ReportService reportService;
     private final DataService<Hospital> hospitalService;
     private final DataService<Pharmacy> pharmacyService;
 
@@ -92,8 +93,10 @@ public class AdminJSONController {
 //    }
 
     @GetMapping("/reports")
-    public String reports(){
-        return "reports.html";
+    public ResponseEntity<List<ReportDTO>> reports(){
+        List<Report> reports = reportService.getReports();
+        List<ReportDTO> reportDTOS = entityListFromReportDTOS(reports);
+        return new ResponseEntity<>(reportDTOS, HttpStatus.OK);
     }
 
     @GetMapping("/reports/{reportId}")
@@ -230,6 +233,37 @@ public class AdminJSONController {
             userJSONList.add(userJSONFromEntity(member));
         }
         return userJSONList;
+    }
+
+    private List<ReportDTO> entityListFromReportDTOS(List<Report> reports){
+        List<ReportDTO> list = new ArrayList<>();
+        for (Report report : reports) {
+            ReportDTO reportDTO = entityFromReportDTO(report);
+            list.add(reportDTO);
+        }
+        return list;
+    }
+
+    private ReportDTO entityFromReportDTO(Report report){
+        ReportDTO reportDTO = new ReportDTO();
+        reportDTO.setName(report.getName());
+        reportDTO.setContent(report.getComment());
+        reportDTO.setCreatedAt(report.getCreatedDate());
+        reportDTO.setTargetId(report.getPharmHospId());
+        reportDTO.setReportType(report.getReportType());
+        if(report.getModifiedAt() != null)
+            reportDTO.setModifiedAt(report.getModifiedAt());
+        try{
+            reportDTO.setTargetName(hospitalService.findById(report.getPharmHospId()).getName());
+        } catch (Exception ignored){
+
+        }
+        try{
+            reportDTO.setTargetName(pharmacyService.findById(report.getPharmHospId()).getName());
+        } catch (Exception ignored){
+
+        }
+        return reportDTO;
     }
 
 }
